@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-   "engines": {
+  "engines": {
     "node": "20.x"
   },
   "scripts": {
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",
-    "vite": "^7.1.9"
+    "vite": "^7.1.9",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }
