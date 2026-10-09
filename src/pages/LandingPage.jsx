@@ -16,8 +16,8 @@ export default function LandingPage() {
         <section className="hero">
           <div className="hero__content">
             <div>
-              <span className="eyebrow">P01 · Inicio público</span>
-              <h1>Tus cultivos en un solo lugar</h1>
+              <span className="eyebrow">P01 · Inicio público para la gestión de cultivos</span>
+              <h1>Tus cultivos en un solo lugar, solo aqui</h1>
               <p>Registra, consulta y da seguimiento a tus cultivos incluso cuando estás en el campo y no tienes conexión a Internet.</p>
               <div className="row"><Link to="/registro"><BaseButton>Regístrate</BaseButton></Link><Link to="/login"><BaseButton variant="secondary">Inicia sesión</BaseButton></Link></div>
             </div>
