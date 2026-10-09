@@ -8,6 +8,8 @@ import '@fontsource/inter/latin-600.css'
 import '@fontsource/inter/latin-700.css'
 import './styles/tokens.css'
 import './styles/global.css'
+import { registerPwa } from './pwa/registerPwa'
+import { openAgroDatabase } from './storage/agroDb'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -16,3 +18,9 @@ createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </StrictMode>,
 )
+
+registerPwa()
+
+openAgroDatabase().catch((error) => {
+  console.error('No se pudo inicializar el almacenamiento local de Agro.', error)
+})
