@@ -5,7 +5,7 @@
 - Este repositorio contiene únicamente el frontend de AgroPWA. El backend pertenece a otro repositorio y no debe implementarse ni simularse como servicio dentro de este proyecto.
 - La aplicación usa React 19, Vite 7 y React Router. Mantén las rutas P01 a P12 definidas en `src/App.jsx`.
 - La landing pública es la ruta `/`; ofrece información de la aplicación y acceso a `/registro` y `/login`. Las rutas autenticadas viven bajo `/app` y comparten `src/layouts/AppLayout.jsx`.
-- La interfaz actual emplea datos y navegación de demostración. No presentar esta información como integración real con un backend hasta que exista una API acordada.
+- Registro y autenticación en línea usan la API acordada. El dashboard, los cultivos y demás datos siguen siendo demostrativos; no presentarlos como integración real.
 
 ## Diseño y componentes
 
@@ -37,3 +37,7 @@
 - No trabajar directamente sobre `develop`, `release` o `main`.
 - No cambiar de rama, realizar merge, push, pull request ni eliminar ramas sin autorización explícita.
 - Verificar que la rama corresponda al Sprint y a la historia actual antes de modificar código.
+
+## Contexto y decisiones
+
+- Consultar `Memoria.md` para el estado confirmado, `Constitution.md` para los principios y `docs/DAILY_SPRINT4.md` para los acuerdos pendientes. Actualizarlos cuando una tarea cambie sus hechos, sin incluir información sensible.

@@ -2,7 +2,7 @@
 
 ## Propósito
 
-AgroPWA es una aplicación web progresiva para que productores registren y consulten la información de sus cultivos, incluso cuando la conectividad es limitada. Este repositorio alberga exclusivamente el frontend; el backend aún no tiene código y pertenece a otro repositorio.
+AgroPWA es una aplicación web progresiva para productores. Este repositorio alberga exclusivamente el frontend; el backend existe en otro repositorio. El acceso a datos sin conexión aún no está implementado.
 
 La URL pública indicada para el proyecto es [https://gray-plant-0e406c80f.1.azurestaticapps.net](https://gray-plant-0e406c80f.1.azurestaticapps.net).
 
@@ -15,7 +15,7 @@ La URL pública indicada para el proyecto es [https://gray-plant-0e406c80f.1.azu
 | Tipografía | Inter mediante `@fontsource/inter` |
 | Estilos | Tokens CSS en `src/styles/tokens.css`, estilos globales en `src/styles/global.css` y estilos de componentes en `src/components/ui/ui.css` |
 | Responsive | Diseño dirigido principalmente a 390 px y 1440 px; punto de adaptación principal en 800 px |
-| Datos | Contenido de demostración local; no hay API, estado persistente ni autenticación real |
+| Datos | Registro y autenticación en línea conectados a la API; dashboard y cultivos siguen como demostración. IndexedDB tiene una infraestructura inicial sin flujos de negocio conectados |
 | Despliegue SPA | `public/staticwebapp.config.json` reescribe rutas de cliente a `index.html` |
 | CI/CD | No existe actualmente un workflow versionado en `.github/workflows`; El sitio se encuentra publicado mediante Azure Static Web Apps. En la rama analizada no se encontró un workflow dentro de `.github/workflows`. Antes de crear o modificar uno, debe comprobarse si la configuración generada por Azure existe en `main` o en otra rama remota, para evitar duplicarla.|
 
@@ -24,8 +24,8 @@ La URL pública indicada para el proyecto es [https://gray-plant-0e406c80f.1.azu
 | ID | Pantalla | Ruta | Estado actual |
 | --- | --- | --- |
 | P01 | Landing pública | `/` | Presentación de Agro, explicación, quiénes somos, acerca de y acceso a autenticación |
-| P02 | Inicio de sesión | `/login` | Formulario visual; navega al dashboard sin validar credenciales |
-| P03 | Registro | `/registro` | Formulario visual; navega al dashboard sin crear una cuenta real |
+| P02 | Inicio de sesión | `/login` | Formulario conectado a la API; pendiente prueba integral |
+| P03 | Registro | `/registro` | Conectado a la API; registro confirmado por el usuario en Azure |
 | P04 | Dashboard | `/app` | Resumen de ejemplo y accesos rápidos |
 | P05 | Mis cultivos | `/app/cultivos` | Listado local de ejemplo |
 | P06 | Nuevo cultivo | `/app/cultivos/nuevo` | Formulario de ejemplo; vuelve al listado al enviar |
@@ -51,8 +51,8 @@ La URL pública indicada para el proyecto es [https://gray-plant-0e406c80f.1.azu
 
 - Mantener los componentes base y los tokens como la fuente de verdad visual. Debe evitarse crear componentes o CSS duplicados.
 - Existe una duplicación heredada de reglas de UI entre `src/styles/global.css` y `src/components/ui/ui.css`. No se modifica como parte de esta documentación; debe tratarse en una tarea específica de consolidación para evitar cambios visuales accidentales.
-- Las capacidades offline, sincronización, fotografías y autenticación están representadas por la interfaz, no implementadas técnicamente. Su implementación futura exige contrato de API y estrategia de almacenamiento/sincronización acordados con el backend.
-- No hay variables de entorno consumidas actualmente. Cuando sean necesarias, las públicas usarán el prefijo `VITE_` y se documentarán en `.env.example` sin secretos.
+- Las capacidades offline, sincronización y fotografías están representadas por la interfaz, no implementadas de extremo a extremo. Requieren estrategia y contratos acordados.
+- `VITE_API_URL` configura la URL pública de la API; `.env.example` la documenta sin secretos.
 - No hay script `lint` en `package.json`. La validación disponible es `npm run build`; al agregar lint, deberá ejecutarse antes de entregar cambios.
 
 ## Git, ramas y entregas
