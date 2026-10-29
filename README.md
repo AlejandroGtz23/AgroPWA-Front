@@ -45,4 +45,8 @@ El repositorio incluye el fallback de rutas de la SPA en `public/staticwebapp.co
 
 ## Configuración segura
 
-No se usan variables de entorno en la versión actual. Cuando se requieran variables públicas de Vite, deberán usar el prefijo `VITE_` y documentarse en `.env.example` sin secretos. Nunca agregues credenciales, tokens o cadenas de conexión al repositorio.
+La URL pública de la API puede configurarse con `VITE_API_URL`; consulta `.env.example`. En desarrollo se usa `https://localhost:7095` por defecto (perfil HTTPS de la API); en producción se usa la URL pública de Azure si no se establece la variable durante la compilación. La URL de Vite queda visible en el código del navegador: nunca incluyas credenciales, tokens o cadenas de conexión.
+
+Para probar el registro localmente, inicia la API con el perfil HTTPS y su base de datos, acepta el certificado de desarrollo si es necesario y verifica que CORS permita `http://localhost:5173`. Copia `.env.example` a `.env` solo si necesitas cambiar la URL. La compilación de Azure puede sobrescribir `VITE_API_URL` durante el build; las variables de ejecución del servidor no modifican un frontend ya compilado.
+
+El registro guarda los tokens y el usuario en `sessionStorage` de la pestaña, que es accesible para JavaScript y no protege frente a XSS. Esta solución inicial no implementa aún login, renovación de tokens, cierre de sesión ni protección de rutas; corresponden a la integración de autenticación posterior.
