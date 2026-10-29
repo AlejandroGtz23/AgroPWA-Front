@@ -1,4 +1,5 @@
-const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD
+const env = import.meta.env || {}
+const apiUrl = env.VITE_API_URL || (env.PROD
   ? 'https://agropwa-api-cfcfcdbhdddqh7a7.centralus-01.azurewebsites.net'
   : 'https://localhost:7095')
 
@@ -35,4 +36,12 @@ export function registrarUsuario(datos) {
 
 export function comprobarSalud() {
   return solicitarApi('/api/salud', { cache: 'no-store' })
+}
+
+export function iniciarSesion(datos) {
+  return solicitarApi('/api/auth/login', { method: 'POST', body: JSON.stringify(datos) })
+}
+
+export function renovarSesion(refreshToken) {
+  return solicitarApi('/api/auth/renovar', { method: 'POST', body: JSON.stringify({ refreshToken }) })
 }

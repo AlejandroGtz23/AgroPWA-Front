@@ -1,6 +1,12 @@
 # AgroPWA Frontend
 
-Repositorio del frontend para Agro, una PWA orientada al registro y seguimiento de cultivos. El trabajo sin conexión forma parte del alcance futuro; actualmente está representado únicamente mediante la interfaz de demostración.
+Repositorio del frontend para Agro, una PWA orientada al registro y seguimiento de cultivos. Registro e inicio de sesión están conectados a la API; el acceso a datos sin conexión sigue pendiente.
+
+## Sprint 4 · Autenticación
+
+- HU-09: registro con validaciones y creación de sesión; el usuario confirmó la creación de una cuenta en Azure y su base de datos.
+- HU-10: login en línea, Recordarme, rutas protegidas, Bearer y renovación con rotación implementados en esta rama; pendientes de prueba integral y despliegue.
+- El dashboard, los cultivos, fotos y sincronización aún usan datos de demostración. No se implementó el acceso offline de HU-10 ni el cierre de sesión de HU-11.
 
 ## Sprint 1
 
@@ -31,11 +37,12 @@ npm run dev
 
 ```bash
 npm run build
+node --test tests/autenticacion.test.js
 ```
 
 ## Documentación del proyecto
 
-El alcance funcional, las rutas, las decisiones técnicas y las reglas de colaboración se documentan en [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) y [AGENTS.md](AGENTS.md).
+El estado se resume en [Memoria.md](Memoria.md), los principios en [Constitution.md](Constitution.md), las reglas de colaboración en [AGENTS.md](AGENTS.md) y los puntos pendientes en [docs/DAILY_SPRINT4.md](docs/DAILY_SPRINT4.md). [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) conserva el mapa de rutas.
 
 ## Despliegue
 
@@ -49,4 +56,4 @@ La URL pública de la API puede configurarse con `VITE_API_URL`; consulta `.env.
 
 Para probar el registro localmente, inicia la API con el perfil HTTPS y su base de datos, acepta el certificado de desarrollo si es necesario y verifica que CORS permita `http://localhost:5173`. Copia `.env.example` a `.env` solo si necesitas cambiar la URL. La compilación de Azure puede sobrescribir `VITE_API_URL` durante el build; las variables de ejecución del servidor no modifican un frontend ya compilado.
 
-El registro guarda los tokens y el usuario en `sessionStorage` de la pestaña, que es accesible para JavaScript y no protege frente a XSS. Esta solución inicial no implementa aún login, renovación de tokens, cierre de sesión ni protección de rutas; corresponden a la integración de autenticación posterior.
+Sin Recordarme, los tokens y usuario se guardan en `sessionStorage`; con Recordarme, en `localStorage`. Ambos son accesibles desde JavaScript y vulnerables a XSS. La sesión se verifica en línea; no se guarda la contraseña. La renovación recordada entre pestañas requiere Web Locks, y si no está disponible se informa al usuario. Quedan por acordar cookies HttpOnly/Secure, CSRF, acceso offline, expiración real de sesión y motivos de cierre con backend. La recuperación de contraseña y el logout no están implementados.
