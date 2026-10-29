@@ -116,6 +116,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .terms-field { display: grid; gap: var(--space-2); font-size: var(--font-size-sm); }
 .terms-field label { display: flex; align-items: flex-start; gap: var(--space-2); }
 .terms-field input { accent-color: var(--color-primary-600); }
+.auth-option { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); }
+.auth-option input { accent-color: var(--color-primary-600); }
 .terms-field small { color: var(--color-danger); }
 .form-actions { display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-5); }
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
