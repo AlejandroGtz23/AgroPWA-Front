@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import CerrarSesion from './CerrarSesion'
 import './navigation.css'
 
 const links = [
@@ -15,6 +16,7 @@ export default function Sidebar() {
       <nav aria-label="Navegación principal">
         {links.map(([label, to]) => <NavLink key={to} to={to} end={to === '/app'}>{label}</NavLink>)}
       </nav>
+      <CerrarSesion />
       <small>Modo PWA · Sprint 1</small>
     </aside>
   )

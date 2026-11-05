@@ -101,3 +101,18 @@ export async function deleteRecord(storeName, id) {
     transaction.onerror = () => database.close()
   })
 }
+
+// Hasta acordar estados e identidad de la cola, se cuentan todos sus registros
+// de forma conservadora para no ignorar posibles cambios pendientes.
+export async function contarRegistrosEnCola() {
+  const database = await openAgroDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(STORE_NAMES.syncQueue, 'readonly')
+    const request = transaction.objectStore(STORE_NAMES.syncQueue).count()
+    let total
+    request.onsuccess = () => { total = request.result }
+    transaction.oncomplete = () => { database.close(); resolve(total) }
+    transaction.onabort = () => { database.close(); reject(transaction.error || new Error('No se pudo leer la cola.')) }
+    transaction.onerror = () => { database.close(); reject(transaction.error || new Error('No se pudo leer la cola.')) }
+  })
+}
