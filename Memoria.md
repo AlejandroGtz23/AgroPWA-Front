@@ -12,8 +12,10 @@
 
 - Sin Recordarme se usa sessionStorage; con Recordarme se usa localStorage. Ambos son accesibles a JavaScript y vulnerables a XSS. No guardar contraseñas.
 - La sesión solo se considera validada en línea por la API; Bearer y renovación con rotación se gestionan en `src/auth/autenticacion.js`.
+- Inicio y login comprueban la sesión guardada y redirigen a `/app` si la API la valida; un fallo temporal conserva la sesión y permite reintentar. Falta verificar el comportamiento desplegado.
 - Con Recordarme, la renovación entre pestañas requiere Web Locks; si no está disponible se informa un error sin invalidar la sesión en silencio.
-- El acceso offline, la fecha real de expiración de la sesión y el motivo de cierre son temas para la daily. La HU-11 de logout y la HU-12 del dashboard real siguen pendientes.
+- El acceso offline, la fecha real de expiración de la sesión y el motivo de cierre son temas para la daily. HU-11 tiene cierre local y remoto en esta rama, pendiente de pruebas integrales; el dashboard real de HU-12 sigue pendiente.
+- La cola IndexedDB aún no tiene contrato de estados ni aislamiento por usuario: el aviso de logout cuenta todos los registros de forma conservadora y no los borra. La sincronización real no está implementada.
 
 ## Colaboración
 
