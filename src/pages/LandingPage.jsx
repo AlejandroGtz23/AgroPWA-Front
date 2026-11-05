@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
+import AlertMessage from '../components/ui/AlertMessage'
 
 export default function LandingPage() {
+  const { state } = useLocation()
   return (
     <>
       <header className="public-nav">
@@ -13,6 +15,7 @@ export default function LandingPage() {
         </nav>
       </header>
       <main>
+        {state?.avisoSesion && <div className="page-shell"><AlertMessage title="Cierre de sesión" tone="warning">{state.avisoSesion}</AlertMessage></div>}
         <section className="hero">
           <div className="hero__content">
             <div>
