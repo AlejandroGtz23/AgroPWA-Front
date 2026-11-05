@@ -21,6 +21,8 @@ const { contarRegistrosEnCola } = await import('../src/storage/agroDb.js')
 const { validarParcela } = await import('../src/components/parcelas/reglasParcela.js')
 const { listarParcelas, registrarParcela, editarParcela } = await import('../src/api/parcelas.js')
 const { obtenerResumenDashboard } = await import('../src/api/dashboard.js')
+const { listarTiposCultivo, listarCultivos, registrarCultivo, obtenerDetalleCultivo } = await import('../src/api/cultivos.js')
+const { validarCultivo, diasDesdeSiembra } = await import('../src/components/cultivos/reglasCultivo.js')
 const sesion = (suffix, expired = false) => ({ accessToken: `access-${suffix}`, refreshToken: `refresh-${suffix}`, expiraUtc: new Date(Date.now() + (expired ? -60000 : 600000)).toISOString(), usuario: { id: 1 } })
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -194,4 +196,43 @@ test('clientes de parcelas y dashboard usan rutas y autorización correctas', as
   assert.ok(calls[2].url.endsWith('/api/parcelas/4'))
   assert.equal(calls[2].options.method, 'PUT')
   assert.ok(calls[3].url.endsWith('/api/dashboard/resumen'))
+})
+
+test('validaciones de cultivo aplican campos requeridos, fechas y límites del contrato', () => {
+  const valid = { nombre: 'Maíz criollo', idTipoCultivo: '2', fechaSiembra: '2026-06-12', idParcela: '4', variedad: 'Criollo', observaciones: 'Semilla propia' }
+  assert.deepEqual(validarCultivo(valid, '2026-11-05'), {})
+  assert.equal(validarCultivo({ ...valid, fechaSiembra: '2026-11-06' }, '2026-11-05').fechaSiembra, 'La fecha de siembra no puede ser posterior a hoy.')
+  assert.ok(validarCultivo({ ...valid, nombre: ' ' }).nombre)
+  assert.ok(validarCultivo({ ...valid, idTipoCultivo: '' }).idTipoCultivo)
+  assert.ok(validarCultivo({ ...valid, idParcela: '' }).idParcela)
+  assert.ok(validarCultivo({ ...valid, variedad: 'v'.repeat(81) }).variedad)
+  assert.ok(validarCultivo({ ...valid, observaciones: 'x'.repeat(301) }).observaciones)
+  assert.equal(diasDesdeSiembra('2026-11-01', new Date('2026-11-05T12:00:00')), 4)
+})
+
+test('clientes de cultivos usan catálogo, filtros paginados, autorización y payload acordado', async () => {
+  guardarSesion(sesion('cultivos'))
+  const calls = []
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url: new URL(url), options })
+    if (url.includes('/api/catalogos/tipos-cultivo')) return json([{ id: 2, nombre: 'Maíz' }])
+    if (url.includes('/api/cultivos?')) return json({ elementos: [{ id: 8, nombre: 'Maíz' }], total: 1 })
+    if (options.method === 'POST') return json({ id: 8, nombre: 'Maíz', tipo: 'Maíz', parcela: 'Norte' }, 201)
+    return json({ cultivo: { id: 8 }, avances: [], fotografias: [], totales: { avances: 0, fotografias: 0 } })
+  }
+  await listarTiposCultivo()
+  await listarCultivos({ buscar: ' Maíz ', estado: 'activo', idTipoCultivo: '2', pagina: 2, tamano: 20 })
+  const payload = { idLocal: '3fa85f64-5717-4562-b3fc-2c963f66afa6', nombre: 'Maíz', idTipoCultivo: 2, fechaSiembra: '2026-06-12', idParcela: 4 }
+  await registrarCultivo(payload)
+  await obtenerDetalleCultivo(8)
+  assert.equal(calls.length, 4)
+  assert.ok(calls.every(({ options }) => options.headers.Authorization === 'Bearer access-cultivos'))
+  assert.equal(calls[0].url.pathname, '/api/catalogos/tipos-cultivo')
+  assert.equal(calls[1].url.searchParams.get('buscar'), 'Maíz')
+  assert.equal(calls[1].url.searchParams.get('estado'), 'activo')
+  assert.equal(calls[1].url.searchParams.get('idTipoCultivo'), '2')
+  assert.equal(calls[1].url.searchParams.get('pagina'), '2')
+  assert.equal(calls[2].url.pathname, '/api/cultivos')
+  assert.deepEqual(JSON.parse(calls[2].options.body), payload)
+  assert.equal(calls[3].url.pathname, '/api/cultivos/8')
 })

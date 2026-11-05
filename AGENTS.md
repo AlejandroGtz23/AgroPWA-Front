@@ -5,7 +5,7 @@
 - Este repositorio contiene únicamente el frontend de AgroPWA. El backend pertenece a otro repositorio y no debe implementarse ni simularse como servicio dentro de este proyecto.
 - La aplicación usa React 19, Vite 7 y React Router. Mantén las rutas P01 a P12 definidas en `src/App.jsx`.
 - La landing pública es la ruta `/`; ofrece información de la aplicación y acceso a `/registro` y `/login`. Las rutas autenticadas viven bajo `/app` y comparten `src/layouts/AppLayout.jsx`.
-- Registro, autenticación, resumen del dashboard y parcelas en línea usan la API acordada. Cultivos, perfil editable y sincronización siguen siendo demostrativos; no presentarlos como integración real.
+- Registro, autenticación, resumen del dashboard y parcelas en línea usan la API acordada. HU-14/15/16 conectan cultivos en línea en la rama de trabajo Sprint 6; el guardado/consulta offline y la sincronización siguen pendientes. La edición del perfil y las actividades todavía son demostrativas.
 
 ## Diseño y componentes
 
