@@ -5,8 +5,9 @@ Repositorio del frontend para Agro, una PWA orientada al registro y seguimiento 
 ## Sprint 4 · Autenticación
 
 - HU-09: registro con validaciones y creación de sesión; el usuario confirmó la creación de una cuenta en Azure y su base de datos.
-- HU-10: login en línea, Recordarme, rutas protegidas, Bearer y renovación con rotación implementados en esta rama; pendientes de prueba integral y despliegue.
-- El dashboard, los cultivos, fotos y sincronización aún usan datos de demostración. No se implementó el acceso offline de HU-10 ni el cierre de sesión de HU-11.
+- HU-10: login en línea, Recordarme, restauración al abrir inicio o login, rutas protegidas, Bearer y renovación con rotación implementados en esta rama; pendientes de prueba integral y despliegue.
+- HU-11: cierre de sesión en menú y perfil; comprueba la cola local antes de llamar al backend y elimina la sesión local también si la red falla. Pendiente prueba integral y sincronización real.
+- El dashboard, los cultivos, fotos y sincronización aún usan datos de demostración. No se implementó el acceso offline de HU-10.
 
 ## Sprint 1
 
@@ -56,4 +57,4 @@ La URL pública de la API puede configurarse con `VITE_API_URL`; consulta `.env.
 
 Para probar el registro localmente, inicia la API con el perfil HTTPS y su base de datos, acepta el certificado de desarrollo si es necesario y verifica que CORS permita `http://localhost:5173`. Copia `.env.example` a `.env` solo si necesitas cambiar la URL. La compilación de Azure puede sobrescribir `VITE_API_URL` durante el build; las variables de ejecución del servidor no modifican un frontend ya compilado.
 
-Sin Recordarme, los tokens y usuario se guardan en `sessionStorage`; con Recordarme, en `localStorage`. Ambos son accesibles desde JavaScript y vulnerables a XSS. La sesión se verifica en línea; no se guarda la contraseña. La renovación recordada entre pestañas requiere Web Locks, y si no está disponible se informa al usuario. Quedan por acordar cookies HttpOnly/Secure, CSRF, acceso offline, expiración real de sesión y motivos de cierre con backend. La recuperación de contraseña y el logout no están implementados.
+Sin Recordarme, los tokens y usuario se guardan en `sessionStorage`; con Recordarme, en `localStorage`. Ambos son accesibles desde JavaScript y vulnerables a XSS. La sesión se verifica en línea; no se guarda la contraseña. La renovación recordada entre pestañas requiere Web Locks, y si no está disponible se informa al usuario. Si falla el logout remoto, se borran los tokens locales pero no se garantiza la revocación en el servidor. Quedan por acordar cookies HttpOnly/Secure, CSRF, acceso offline, expiración real de sesión y motivos de cierre con backend. La recuperación de contraseña no está implementada.
