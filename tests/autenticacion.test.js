@@ -18,6 +18,9 @@ const { guardarSesion, obtenerSesion, limpiarSesion, esRecordada } = await impor
 const { solicitarAutenticada, renovar, verificarSesionGuardada } = await import('../src/auth/autenticacion.js')
 const { cerrarSesion } = await import('../src/auth/cerrarSesion.js')
 const { contarRegistrosEnCola } = await import('../src/storage/agroDb.js')
+const { validarParcela } = await import('../src/components/parcelas/reglasParcela.js')
+const { listarParcelas, registrarParcela, editarParcela } = await import('../src/api/parcelas.js')
+const { obtenerResumenDashboard } = await import('../src/api/dashboard.js')
 const sesion = (suffix, expired = false) => ({ accessToken: `access-${suffix}`, refreshToken: `refresh-${suffix}`, expiraUtc: new Date(Date.now() + (expired ? -60000 : 600000)).toISOString(), usuario: { id: 1 } })
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -161,4 +164,34 @@ test('la comprobación de cola cuenta registros sin borrarlos', async () => {
   } }
   assert.equal(await contarRegistrosEnCola(), 3)
   assert.equal(closed, true)
+})
+
+test('validaciones de parcela coinciden con las reglas de superficie y nombre', () => {
+  const valid = { nombre: 'Parcela Norte', superficieHa: '1.25', ubicacionReferencia: '' }
+  assert.deepEqual(validarParcela(valid), {})
+  for (const valor of ['', '0', '-1', 'abc', '1.234', '1000000']) assert.ok(validarParcela({ ...valid, superficieHa: valor }).superficieHa)
+  assert.ok(validarParcela({ ...valid, nombre: '   ' }).nombre)
+  assert.ok(validarParcela({ ...valid, ubicacionReferencia: 'x'.repeat(151) }).ubicacionReferencia)
+})
+
+test('clientes de parcelas y dashboard usan rutas y autorización correctas', async () => {
+  guardarSesion(sesion('api'))
+  const calls = []
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options })
+    return json(url.endsWith('/api/parcelas') && !options.method ? [] : { id: 4 })
+  }
+  const datos = { nombre: 'Parcela', superficieHa: 1.5, ubicacionReferencia: null }
+  await listarParcelas()
+  await registrarParcela({ ...datos, idLocal: '3fa85f64-5717-4562-b3fc-2c963f66afa6' })
+  await editarParcela(4, datos)
+  await obtenerResumenDashboard()
+  assert.equal(calls.length, 4)
+  assert.ok(calls.every((call) => call.options.headers.Authorization === 'Bearer access-api'))
+  assert.ok(calls[0].url.endsWith('/api/parcelas'))
+  assert.equal(calls[1].options.method, 'POST')
+  assert.equal(JSON.parse(calls[1].options.body).idLocal, '3fa85f64-5717-4562-b3fc-2c963f66afa6')
+  assert.ok(calls[2].url.endsWith('/api/parcelas/4'))
+  assert.equal(calls[2].options.method, 'PUT')
+  assert.ok(calls[3].url.endsWith('/api/dashboard/resumen'))
 })

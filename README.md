@@ -2,12 +2,18 @@
 
 Repositorio del frontend para Agro, una PWA orientada al registro y seguimiento de cultivos. Registro e inicio de sesión están conectados a la API; el acceso a datos sin conexión sigue pendiente.
 
+## Sprint 5 · Dashboard y parcelas
+
+- HU-13: consulta, registro y edición de parcelas en línea desde el perfil con API autenticada. Los reintentos de registro conservan `idLocal` para reducir duplicados.
+- HU-12: dashboard conectado al resumen real, guía y actividad reciente del usuario. El contador de sincronización se muestra como no disponible: todavía no hay aislamiento de cola por usuario.
+- Pendiente: pruebas integrales con API y navegador, selector/atajo de parcela en HU-14, datos y acceso offline, sincronización real y validación visual final. El perfil editable, cultivos y actividades siguen en demostración.
+
 ## Sprint 4 · Autenticación
 
 - HU-09: registro con validaciones y creación de sesión; el usuario confirmó la creación de una cuenta en Azure y su base de datos.
 - HU-10: login en línea, Recordarme, restauración al abrir inicio o login, rutas protegidas, Bearer y renovación con rotación implementados en esta rama; pendientes de prueba integral y despliegue.
 - HU-11: cierre de sesión en menú y perfil; comprueba la cola local antes de llamar al backend y elimina la sesión local también si la red falla. Pendiente prueba integral y sincronización real.
-- El dashboard, los cultivos, fotos y sincronización aún usan datos de demostración. No se implementó el acceso offline de HU-10.
+- Cultivos, fotos y sincronización aún usan datos de demostración. No se implementó el acceso offline de HU-10.
 
 ## Sprint 1
 
@@ -43,7 +49,7 @@ node --test tests/autenticacion.test.js
 
 ## Documentación del proyecto
 
-El estado se resume en [Memoria.md](Memoria.md), los principios en [Constitution.md](Constitution.md), las reglas de colaboración en [AGENTS.md](AGENTS.md) y los puntos pendientes en [docs/DAILY_SPRINT4.md](docs/DAILY_SPRINT4.md). [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) conserva el mapa de rutas.
+El estado se resume en [Memoria.md](Memoria.md), los principios en [Constitution.md](Constitution.md), las reglas de colaboración en [AGENTS.md](AGENTS.md) y los puntos pendientes en [docs/DAILY_SPRINT4.md](docs/DAILY_SPRINT4.md) y [docs/DAILY_SPRINT5.md](docs/DAILY_SPRINT5.md). [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) conserva el mapa de rutas.
 
 ## Despliegue
 
