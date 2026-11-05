@@ -54,3 +54,14 @@ export async function solicitarAutenticada(path, options = {}) {
     }
   }
 }
+
+// Distingue una sesión rechazada de un fallo temporal sin exponer tokens a la UI.
+export async function verificarSesionGuardada() {
+  if (!obtenerSesion()) return 'sin-sesion'
+  try {
+    await solicitarAutenticada('/api/auth/yo')
+    return obtenerSesion() ? 'valida' : 'sin-sesion'
+  } catch (error) {
+    return error.status === 401 || !obtenerSesion() ? 'sin-sesion' : 'no-disponible'
+  }
+}

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import RutaProtegida from './auth/RutaProtegida'
+import RestaurarSesion from './auth/RestaurarSesion'
 import AppLayout from './layouts/AppLayout'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -17,8 +18,10 @@ import NotFoundPage from './pages/NotFoundPage'
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route element={<RestaurarSesion />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
       <Route path="/registro" element={<RegisterPage />} />
 
       <Route element={<RutaProtegida />}>
