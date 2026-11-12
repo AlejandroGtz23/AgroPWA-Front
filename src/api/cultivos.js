@@ -16,6 +16,14 @@ export function registrarCultivo(datos, options = {}) {
   return solicitarAutenticada('/api/cultivos', { ...options, method: 'POST', body: JSON.stringify(datos) })
 }
 
+export function editarCultivo(id, datos, options = {}) {
+  return solicitarAutenticada(`/api/cultivos/${encodeURIComponent(id)}`, { ...options, method: 'PUT', body: JSON.stringify(datos) })
+}
+
+export function eliminarCultivo(id, options = {}) {
+  return solicitarAutenticada(`/api/cultivos/${encodeURIComponent(id)}`, { ...options, method: 'DELETE' })
+}
+
 export function obtenerDetalleCultivo(id, options = {}) {
   return solicitarAutenticada(`/api/cultivos/${encodeURIComponent(id)}`, options)
 }

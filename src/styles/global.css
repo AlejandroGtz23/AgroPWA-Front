@@ -193,6 +193,35 @@ button.crop-filter { cursor: pointer; }
 .crop-photo-grid figure { margin: 0; }
 .crop-photo-grid img { display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius-sm); object-fit: cover; background: var(--color-primary-100); }
 .crop-photo-grid figcaption { margin-top: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.login-wait { display: grid; gap: var(--space-1); padding: var(--space-3); border-radius: var(--radius-sm); color: var(--color-primary-700); background: var(--color-primary-100); font-size: var(--font-size-sm); }
+.login-wait span { color: var(--color-text-muted); font-weight: 400; }
+.login-spinner { display: inline-block; width: 1rem; height: 1rem; margin-right: var(--space-2); border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: -0.15em; animation: login-spin 700ms linear infinite; }
+@keyframes login-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .login-spinner { animation-duration: 1.8s; } }
+.crop-unsaved { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.crop-unsaved__dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--color-primary-600); }
+.crop-unsaved__dot.is-dirty { background: var(--color-accent-500); }
+.base-button--danger, .base-button--danger:hover { color: white; background: var(--color-danger); }
+.base-button--danger-outline { color: var(--color-danger); border-color: var(--color-danger); }
+.crop-confirm-dialog { width: min(100% - 2rem, 34rem); padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text); background: var(--color-surface); box-shadow: var(--shadow-card); }
+.crop-confirm-dialog::backdrop { background: rgb(17 32 25 / 55%); }
+.crop-confirm-dialog h2 { margin: var(--space-2) 0; }
+.crop-confirm-dialog p { color: var(--color-text-muted); line-height: 1.55; }
+.crop-confirm-dialog ul { display: flex; gap: var(--space-6); padding-left: var(--space-5); color: var(--color-text-muted); }
+.crop-confirm-dialog__actions { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-5); }
+.contact-section { padding: var(--space-16) var(--space-6); background: var(--color-background-warm); }
+.contact-section__content { width: min(100%, var(--content-max)); margin-inline: auto; }
+.contact-section__grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(28rem, 1fr); gap: var(--space-12); align-items: center; }
+.contact-section__info h2 { max-width: 32rem; margin: var(--space-3) 0; font-size: var(--font-size-2xl); line-height: 1.1; }
+.contact-section__info > p { color: var(--color-text-muted); }
+.contact-details { display: grid; gap: var(--space-5); margin-top: var(--space-8); }
+.contact-details div { display: grid; gap: var(--space-1); }
+.contact-details dt { color: var(--color-primary-700); font-weight: 700; }
+.contact-details dt span { display: inline-grid; place-items: center; width: 1.8rem; height: 1.8rem; margin-right: var(--space-2); border-radius: var(--radius-sm); background: var(--color-primary-100); }
+.contact-details dd { margin: 0 0 0 2.3rem; color: var(--color-text-muted); }
+.contact-form-card { padding: var(--space-6); }
+.contact-form-card > form > .base-button { width: 100%; }
+.contact-form-card > form > small { text-align: center; }
 
 @media (max-width: 800px) {
   .page-shell { padding: var(--space-4); padding-bottom: calc(var(--bottom-nav-height) + var(--space-6)); }
@@ -227,4 +256,12 @@ button.crop-filter { cursor: pointer; }
   .crop-detail__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .crop-detail__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .crop-detail__actions .base-button:last-child { grid-column: 1 / -1; }
+  .contact-section { padding: var(--space-10) var(--space-4); }
+  .contact-section__grid { grid-template-columns: 1fr; gap: var(--space-6); }
+  .contact-section__info h2 { font-size: var(--font-size-xl); }
+  .contact-details { margin-top: var(--space-5); }
+  .contact-form-card { padding: var(--space-4); }
+  .crop-confirm-dialog { padding: var(--space-5); }
+  .crop-confirm-dialog__actions { flex-direction: column-reverse; }
+  .crop-confirm-dialog__actions .base-button { width: 100%; }
 }

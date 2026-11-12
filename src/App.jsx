@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage'
 import CropsPage from './pages/CropsPage'
 import CropFormPage from './pages/CropFormPage'
 import CropDetailPage from './pages/CropDetailPage'
+import CropEditPage from './pages/CropEditPage'
 import ActivityFormPage from './pages/ActivityFormPage'
 import PhotosPage from './pages/PhotosPage'
 import SyncPage from './pages/SyncPage'
@@ -29,6 +30,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="cultivos" element={<CropsPage />} />
           <Route path="cultivos/nuevo" element={<CropFormPage />} />
+          <Route path="cultivos/:cropId/editar" element={<CropEditPage />} />
           <Route path="cultivos/:cropId" element={<CropDetailPage />} />
           <Route path="cultivos/:cropId/actividad" element={<ActivityFormPage />} />
           <Route path="actividades/:activityId/fotos" element={<PhotosPage />} />

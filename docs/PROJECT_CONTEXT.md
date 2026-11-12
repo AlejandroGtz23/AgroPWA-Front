@@ -15,21 +15,22 @@ La URL pública indicada para el proyecto es [https://gray-plant-0e406c80f.1.azu
 | Tipografía | Inter mediante `@fontsource/inter` |
 | Estilos | Tokens CSS en `src/styles/tokens.css`, estilos globales en `src/styles/global.css` y estilos de componentes en `src/components/ui/ui.css` |
 | Responsive | Diseño dirigido principalmente a 390 px y 1440 px; punto de adaptación principal en 800 px |
-| Datos | Registro, autenticación, resumen del dashboard y parcelas integrados y confirmados en Azure por el usuario. En `Sprint6_Alejandro`, registro/listado/detalle de cultivos conectados en línea; el resto de HU-14/15/16 (offline, cola por usuario, foto y pendientes locales) sigue sin implementar |
+| Datos | Registro, autenticación, dashboard y parcelas integrados y confirmados en Azure hasta Sprint 5. Sprint 6 está en `main` sin confirmación de despliegue; Sprint 7 está en trabajo en línea. Offline, cola por usuario y sincronización siguen pendientes |
 | Despliegue SPA | `public/staticwebapp.config.json` reescribe rutas de cliente a `index.html` |
-| CI/CD | No existe actualmente un workflow versionado en `.github/workflows`; El sitio se encuentra publicado mediante Azure Static Web Apps. En la rama analizada no se encontró un workflow dentro de `.github/workflows`. Antes de crear o modificar uno, debe comprobarse si la configuración generada por Azure existe en `main` o en otra rama remota, para evitar duplicarla.|
+| CI/CD | `main` conserva el workflow generado por Azure Static Web Apps. La rama de desarrollo parte de `develop`, que no contiene dicho workflow; preservar la configuración al promover cambios. |
 
 ## Mapa funcional de pantallas
 
 | ID | Pantalla | Ruta | Estado actual |
 | --- | --- | --- |
-| P01 | Landing pública | `/` | Presentación de Agro, explicación, quiénes somos, acerca de y acceso a autenticación |
-| P02 | Inicio de sesión | `/login` | Formulario conectado a la API; pendiente prueba integral |
+| P01 | Landing pública | `/` | Presentación, acerca de y formulario de contacto en línea (HU-28); prueba integral pendiente |
+| P02 | Inicio de sesión | `/login` | API en línea; progreso visible y aviso si la respuesta supera 5 s |
 | P03 | Registro | `/registro` | Conectado a la API; registro confirmado por el usuario en Azure |
 | P04 | Dashboard | `/app` | Resumen autenticado y accesos; funcionamiento offline pendiente |
 | P05 | Mis cultivos | `/app/cultivos` | Consulta en línea con búsqueda, filtros disponibles y paginación; sin caché offline |
 | P06 | Nuevo cultivo | `/app/cultivos/nuevo` | Catálogo y parcelas del usuario, validaciones y alta en línea; offline/foto pendientes |
-| P07 | Detalle de cultivo | `/app/cultivos/:cropId` | Detalle, avances y fotografías consultados en línea; editar/eliminar/registrar avance pendientes |
+| P07 | Detalle de cultivo | `/app/cultivos/:cropId` | Detalle en línea; acciones para editar y borrar con confirmación/deshacer |
+| P07-A | Editar cultivo | `/app/cultivos/:cropId/editar` | Formulario de edición online (HU-17); sin guardado offline |
 | P08 | Registrar actividad | `/app/cultivos/:cropId/actividad` | Formulario de ejemplo y navegación a fotografías |
 | P09 | Fotografías | `/app/actividades/:activityId/fotos` | Marcadores visuales; no usa cámara ni almacenamiento |
 | P10 | Sincronización | `/app/sincronizacion` | Indicadores y elementos pendientes estáticos |
@@ -57,12 +58,12 @@ La URL pública indicada para el proyecto es [https://gray-plant-0e406c80f.1.azu
 
 ## Git, ramas y entregas
 
-La rama personal de trabajo actual es `Sprint6_Alejandro`; la rama de integración `Sprint6` parte de `develop`. No se trabaja directamente sobre `main`.
+La rama personal de trabajo actual es `Sprint7_Alejandro`; la rama de integración `Sprint7` parte de `develop`. No se trabaja directamente sobre `main`.
 
 El flujo de ramas real encontrado en el remoto es:
 
 ```text
-Sprint6_Alejandro → Sprint6 → develop → release → main
+Sprint7_Alejandro → Sprint7 → develop → release → main
 ```
 
 El contexto de negocio denomina a los dos pasos intermedios `Development` y `Release/Test`, mientras que las ramas existentes son `develop` y `release`. Hasta que el repositorio se renombre formalmente, deben usarse los nombres reales.
