@@ -6,7 +6,9 @@
 - Sprint 4 de autenticación: HU-09 se probó en Azure con respuesta 201 y el usuario confirmó el registro en la base. El usuario también confirmó que la versión integrada, incluido login online, funciona correctamente en Azure; el acceso offline de HU-10 sigue pendiente.
 - La API configurada tiene entornos local y Azure; `VITE_API_URL` es pública y se define en compilación.
 - Sprint 5: dashboard y parcelas en línea integrados por el flujo de PR y confirmados por el usuario como correctos en Azure.
-- Sprint 6: HU-14/15/16 trabajan consultas y registro de cultivos en línea en `Sprint6_Alejandro`; build y 17 pruebas pasan. Sin conexión, aislamiento de caché, cola, fotos y acciones de HUs posteriores no se consideran implementados.
+- Sprint 6: HU-14/15/16 se integraron hasta `main`. El usuario confirmó producción de Sprint 5, pero aún no confirmó el despliegue de Sprint 6.
+- Sprint 7: ramas `Sprint7_Alejandro` y `Sprint7` creadas desde `develop`. En curso HU-17/18/28 frontend y mejora informativa del login; offline y sincronización no se implementan hasta acordar aislamiento por usuario.
+- Login: el frontend realiza una sola petición `POST /api/auth/login`, sin demora artificial ni reintento. Se añadió progreso y orientación después de 5 s; la causa real debe medirse en navegador/API/Azure.
 - No hay acceso de datos offline autenticado: IndexedDB tiene almacenes básicos, pero no flujo de negocio ni aislamiento de usuarios acordado.
 
 ## Sesiones
@@ -21,5 +23,5 @@
 
 ## Colaboración
 
-- Fuente de verdad de reglas: `AGENTS.md`. Principios y límites: `Constitution.md`. Seguimiento: `docs/DAILY_SPRINT4.md`, `docs/DAILY_SPRINT5.md` y `docs/DAILY_SPRINT6.md`.
+- Fuente de verdad de reglas: `AGENTS.md`. Principios y límites: `Constitution.md`. Seguimiento: `docs/DAILY_SPRINT4.md` a `docs/DAILY_SPRINT7.md`.
 - No asumir que cambios locales o historias ya están desplegados; confirmar rama, PR y despliegue. No modificar Jira ni ramas sin autorización.

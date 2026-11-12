@@ -16,4 +16,4 @@
 4. Pendientes HU-14/15/16: selector visual de «Pendientes» real, guardar/leer catálogo y cultivos offline con contrato seguro, orden global requerido por HU-15 y pruebas integrales con API y navegador.
 5. Foto de portada corresponde a HU-20; editar/eliminar y registrar avances son HUs posteriores. No se simulan como funcionalidades listas.
 6. HU-17, HU-18 y HU-28 asignadas a la persona aparecen en Sprint 7; se dejan fuera de este alcance para mantener la secuencia acordada.
-7. Sprint 5 fue confirmado por el usuario como correcto en Azure. Sprint 6 todavía es desarrollo local y no está desplegado ni marcado en Jira.
+7. Sprint 5 fue confirmado por el usuario como correcto en Azure. Posteriormente Sprint 6 se integró hasta `main` mediante PR #34; falta confirmación del usuario sobre ese despliegue. Jira no se actualizó.
