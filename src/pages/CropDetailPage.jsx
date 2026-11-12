@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { obtenerDetalleCultivo } from '../api/cultivos'
+import { programarEliminacionCultivo } from '../components/cultivos/gestorEliminacion'
 import AlertMessage from '../components/ui/AlertMessage'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
@@ -14,6 +15,24 @@ function fechaCorta(value) {
   return new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium' }).format(new Date(`${value.slice(0, 10)}T12:00:00`))
 }
 
+function DialogoEliminar({ cultivo, totales, online, onCancelar, onConfirmar }) {
+  const dialogo = useRef(null)
+  useEffect(() => {
+    dialogo.current?.showModal()
+    return () => { if (dialogo.current?.open) dialogo.current.close() }
+  }, [])
+
+  return <dialog ref={dialogo} className="crop-confirm-dialog" aria-labelledby="titulo-confirmar-eliminacion" onCancel={(event) => { event.preventDefault(); onCancelar() }}>
+    <span className="eyebrow">P08-B · Confirmar eliminación</span>
+    <h2 id="titulo-confirmar-eliminacion">¿Eliminar este cultivo?</h2>
+    <p>Vas a eliminar <strong>{cultivo.nombre}</strong> y su historial. Esta acción no se puede deshacer después de confirmar.</p>
+    <ul><li>{totales.avances} {totales.avances === 1 ? 'avance' : 'avances'}</li><li>{totales.fotografias} {totales.fotografias === 1 ? 'fotografía' : 'fotografías'}</li></ul>
+    <p className="muted">Al confirmar, tendrás 5 segundos para deshacer antes de enviar la eliminación al servidor.</p>
+    {!online && <AlertMessage title="Sin conexión" tone="warning">La eliminación offline todavía no está disponible. Vuelve a intentarlo cuando tengas conexión.</AlertMessage>}
+    <div className="crop-confirm-dialog__actions"><BaseButton variant="secondary" onClick={onCancelar}>Cancelar</BaseButton><BaseButton className="base-button--danger" disabled={!online} onClick={onConfirmar}>Sí, eliminar</BaseButton></div>
+  </dialog>
+}
+
 export default function CropDetailPage() {
   const { cropId } = useParams()
   const navigate = useNavigate()
@@ -22,6 +41,7 @@ export default function CropDetailPage() {
   const [pestana, setPestana] = useState('avances')
   const [estado, setEstado] = useState('cargando')
   const [intento, setIntento] = useState(0)
+  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -55,7 +75,7 @@ export default function CropDetailPage() {
         {[['Tipo', cultivo.tipo], ['Variedad', cultivo.variedad || '—'], ['Parcela', cultivo.parcela], ['Superficie', `${cultivo.superficieHa} ha`], ['Siembra', fechaCorta(cultivo.fechaSiembra)], ['Días de cultivo', `${dias} días`]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
       </dl>
       {cultivo.observaciones && <div className="crop-observations"><strong>Observaciones</strong><p>{cultivo.observaciones}</p></div>}
-      <div className="crop-detail__actions"><BaseButton variant="secondary" disabled title="La edición corresponde a HU-17">✎ Editar</BaseButton><BaseButton variant="secondary" disabled title="La eliminación corresponde a HU-18">Eliminar</BaseButton><BaseButton disabled title="El registro de avances corresponde a HU-19">+ Registrar avance</BaseButton></div>
+      <div className="crop-detail__actions"><Link to={`/app/cultivos/${cropId}/editar`}><BaseButton variant="secondary">✎ Editar</BaseButton></Link><BaseButton variant="secondary" className="base-button--danger-outline" disabled={!online} title={!online ? 'La eliminación offline no está habilitada' : undefined} onClick={() => setConfirmarEliminacion(true)}>Eliminar</BaseButton><BaseButton disabled title="El registro de avances corresponde a HU-19">+ Registrar avance</BaseButton></div>
     </BaseCard>
     <div className="crop-tabs" role="tablist" aria-label="Información del cultivo">
       <button type="button" role="tab" aria-selected={pestana === 'avances'} onClick={() => setPestana('avances')}>Avances ({totales.avances})</button>
@@ -65,5 +85,10 @@ export default function CropDetailPage() {
       {avances.length ? avances.map((avance) => <BaseCard className="crop-timeline__item" key={avance.id}><div className="row row--between"><StatusTag>{avance.tipo}</StatusTag><time dateTime={avance.fechaActividad}>{fechaCorta(avance.fechaActividad)}</time></div><p>{avance.descripcion}</p><span className="muted">{avance.fotos} {avance.fotos === 1 ? 'foto' : 'fotos'}</span></BaseCard>) : <BaseCard className="crop-empty"><h2>Aún no hay avances</h2><p className="muted">El registro de avances se habilitará en HU-19.</p><BaseButton disabled>+ Registrar avance</BaseButton></BaseCard>}
     </section>}
     {pestana === 'fotografias' && (fotografias.length ? <div className="crop-photo-grid">{fotografias.map((foto) => <figure key={foto.id}><img src={foto.url} alt={`Fotografía del cultivo ${cultivo.nombre}`} loading="lazy" /><figcaption>{fechaCorta(foto.fechaCaptura)}{foto.esPortada ? ' · Portada' : ''}</figcaption></figure>)}</div> : <BaseCard className="crop-empty"><h2>Aún no hay fotografías</h2><p className="muted">La captura y carga de fotografías corresponde a HU-20.</p></BaseCard>)}
+    {confirmarEliminacion && <DialogoEliminar cultivo={cultivo} totales={totales} online={online} onCancelar={() => setConfirmarEliminacion(false)} onConfirmar={() => {
+      programarEliminacionCultivo(cultivo)
+      setConfirmarEliminacion(false)
+      navigate('/app/cultivos')
+    }} />}
   </div>
 }

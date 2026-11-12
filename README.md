@@ -5,21 +5,29 @@ Repositorio del frontend para Agro, una PWA orientada al registro y seguimiento 
 ## Estado de producción
 
 - El usuario confirmó que el trabajo integrado del Sprint 5 funciona correctamente en Azure Static Web Apps.
-- Las modificaciones del Sprint 6 están en desarrollo local y no se consideran desplegadas.
+- Sprint 6 se integró en `main`; el usuario todavía no ha confirmado el resultado de ese despliegue en Azure. La confirmación más reciente de producción corresponde a Sprint 5.
 
-## Sprint 6 · Cultivos I (en desarrollo)
+## Sprint 6 · Cultivos I (integrado en main)
 
 - HU-14 / SCRUM-45: formulario de registro conectado al catálogo, parcelas y `POST /api/cultivos`, con validaciones y resumen de resultado.
 - HU-15 / SCRUM-47: listado en línea con búsqueda, filtros por estado/tipo y paginación.
 - HU-16 / SCRUM-49: detalle autenticado, manejo 404, avances y galería devueltos por la API.
-- Validación local: `npm run build` y `node --test tests/autenticacion.test.js` (17 pruebas).
-- Pendiente: offline y cola segura por usuario, filtro local «Pendientes», foto/cámara (HU-20), editar/eliminar (HU-17/18), registro de avances (HU-19), pruebas integrales y despliegue.
+- HU-14/15/16 se integraron en línea. Offline y cola segura por usuario, filtro local «Pendientes», foto/cámara (HU-20) y registro de avances (HU-19) siguen pendientes.
+
+## Sprint 7 · Cultivos II (en desarrollo)
+
+- HU-17 / SCRUM-51: formulario para editar datos/estado en línea, validación de fecha de cosecha e indicador de cambios sin guardar.
+- HU-18 / SCRUM-53: confirmación de borrado y ventana de 5 segundos para deshacer antes de enviar `DELETE`.
+- HU-28 / SCRUM-67: formulario público de contacto con validación, contador, límites 429 y conservación del texto si falla la conexión.
+- Mejora UX de login: muestra progreso e informa cuando la respuesta tarda; el frontend solo hace una petición de login y la latencia del servidor/red requiere medición externa.
+- Pendiente: flujos offline/cola, pruebas integrales con backend y confirmación del despliegue. Sprint 7 sigue marcado `future` en Jira pese a fechas 2–7 nov 2026.
+- Validación local: `npm run build` y 20 pruebas (`node --test tests/autenticacion.test.js`).
 
 ## Sprint 5 · Dashboard y parcelas (integrado y confirmado en producción)
 
 - HU-13: consulta, registro y edición de parcelas en línea desde el perfil con API autenticada. Los reintentos de registro conservan `idLocal` para reducir duplicados.
 - HU-12: dashboard conectado al resumen real, guía y actividad reciente del usuario. El contador de sincronización se muestra como no disponible: todavía no hay aislamiento de cola por usuario.
-- Pendiente: aislamiento por usuario de IndexedDB y cola, sincronización real y el selector de parcela ahora en trabajo de HU-14. El perfil editable, actividades y fotos siguen en demostración.
+- Pendiente: aislamiento por usuario de IndexedDB y cola y sincronización real. El perfil editable, actividades y fotos siguen en demostración.
 
 ## Sprint 4 · Autenticación
 
@@ -62,13 +70,13 @@ node --test tests/autenticacion.test.js
 
 ## Documentación del proyecto
 
-El estado se resume en [Memoria.md](Memoria.md), los principios en [Constitution.md](Constitution.md), las reglas de colaboración en [AGENTS.md](AGENTS.md) y las dailies [Sprint 4](docs/DAILY_SPRINT4.md), [Sprint 5](docs/DAILY_SPRINT5.md) y [Sprint 6](docs/DAILY_SPRINT6.md). [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) conserva el mapa de rutas.
+El estado se resume en [Memoria.md](Memoria.md), los principios en [Constitution.md](Constitution.md), las reglas de colaboración en [AGENTS.md](AGENTS.md) y las dailies [Sprint 4](docs/DAILY_SPRINT4.md), [Sprint 5](docs/DAILY_SPRINT5.md), [Sprint 6](docs/DAILY_SPRINT6.md) y [Sprint 7](docs/DAILY_SPRINT7.md). [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) conserva el mapa de rutas.
 
 ## Despliegue
 
 La aplicación se publica en Azure Static Web Apps: [AgroPWA](https://gray-plant-0e406c80f.1.azurestaticapps.net).
 
-El repositorio incluye el fallback de rutas de la SPA en `public/staticwebapp.config.json`. El sitio se encuentra publicado mediante Azure Static Web Apps. En la rama analizada no se encontró un workflow dentro de `.github/workflows`. Antes de crear o modificar uno, debe comprobarse si la configuración generada por Azure existe en `main` o en otra rama remota, para evitar duplicarla.
+El repositorio incluye el fallback de rutas de la SPA en `public/staticwebapp.config.json`. `main` conserva el workflow de Azure Static Web Apps; la rama `develop` desde la que parte Sprint 7 no incluye ese workflow. No lo dupliques ni cambies sin revisar primero las ramas de despliegue.
 
 ## Configuración segura
 

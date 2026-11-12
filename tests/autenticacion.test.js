@@ -21,8 +21,11 @@ const { contarRegistrosEnCola } = await import('../src/storage/agroDb.js')
 const { validarParcela } = await import('../src/components/parcelas/reglasParcela.js')
 const { listarParcelas, registrarParcela, editarParcela } = await import('../src/api/parcelas.js')
 const { obtenerResumenDashboard } = await import('../src/api/dashboard.js')
-const { listarTiposCultivo, listarCultivos, registrarCultivo, obtenerDetalleCultivo } = await import('../src/api/cultivos.js')
+const { listarTiposCultivo, listarCultivos, registrarCultivo, obtenerDetalleCultivo, editarCultivo, eliminarCultivo } = await import('../src/api/cultivos.js')
+const { enviarContacto } = await import('../src/api/contacto.js')
 const { validarCultivo, diasDesdeSiembra } = await import('../src/components/cultivos/reglasCultivo.js')
+const { validarEdicionCultivo } = await import('../src/components/cultivos/reglasEdicionCultivo.js')
+const { obtenerEstadoEsperaLogin } = await import('../src/auth/estadoEsperaLogin.js')
 const sesion = (suffix, expired = false) => ({ accessToken: `access-${suffix}`, refreshToken: `refresh-${suffix}`, expiraUtc: new Date(Date.now() + (expired ? -60000 : 600000)).toISOString(), usuario: { id: 1 } })
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -235,4 +238,45 @@ test('clientes de cultivos usan catálogo, filtros paginados, autorización y pa
   assert.equal(calls[2].url.pathname, '/api/cultivos')
   assert.deepEqual(JSON.parse(calls[2].options.body), payload)
   assert.equal(calls[3].url.pathname, '/api/cultivos/8')
+})
+
+test('edición valida estado y fecha de cosecha según contrato', () => {
+  const values = { nombre: 'Maíz', idTipoCultivo: '2', fechaSiembra: '2026-06-12', idParcela: '4', estado: 'activo', fechaCosecha: '', variedad: '', observaciones: '' }
+  assert.deepEqual(validarEdicionCultivo(values, '2026-11-12'), {})
+  assert.equal(validarEdicionCultivo({ ...values, estado: 'finalizado' }, '2026-11-12').fechaCosecha, 'Captura la fecha de cosecha.')
+  assert.equal(validarEdicionCultivo({ ...values, estado: 'finalizado', fechaCosecha: '2026-06-11' }, '2026-11-12').fechaCosecha, 'La fecha de cosecha no puede ser anterior a la siembra.')
+  assert.equal(validarEdicionCultivo({ ...values, estado: 'finalizado', fechaCosecha: '2026-06-13' }, '2026-11-12').fechaCosecha, undefined)
+})
+
+test('clientes de edición/eliminación de cultivos y formulario público usan contratos definidos', async () => {
+  guardarSesion(sesion('sprint7'))
+  const calls = []
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url: new URL(url), options })
+    if (url.endsWith('/api/contacto')) return json({ id: 1 }, 201)
+    if (options.method === 'DELETE') return new Response(null, { status: 204 })
+    return json({ id: 8, estado: 'finalizado' })
+  }
+  const payload = { nombre: 'Maíz', idTipoCultivo: 2, variedad: null, fechaSiembra: '2026-06-12', idParcela: 4, estado: 'finalizado', fechaCosecha: '2026-11-01', observaciones: null }
+  await editarCultivo(8, payload)
+  await eliminarCultivo(8)
+  const contacto = { nombre: 'Ana', correo: 'ana@example.com', asunto: 'Consulta', mensaje: 'Hola' }
+  await enviarContacto(contacto)
+  assert.equal(calls.length, 3)
+  assert.equal(calls[0].url.pathname, '/api/cultivos/8')
+  assert.equal(calls[0].options.method, 'PUT')
+  assert.deepEqual(JSON.parse(calls[0].options.body), payload)
+  assert.equal(calls[0].options.headers.Authorization, 'Bearer access-sprint7')
+  assert.equal(calls[1].options.method, 'DELETE')
+  assert.equal(calls[1].options.headers.Authorization, 'Bearer access-sprint7')
+  assert.equal(calls[2].url.pathname, '/api/contacto')
+  assert.equal(calls[2].options.method, 'POST')
+  assert.deepEqual(JSON.parse(calls[2].options.body), contacto)
+  assert.equal(calls[2].options.headers.Authorization, undefined)
+})
+
+test('el login explica la espera inicial y ofrece orientación cuando tarda más de cinco segundos', () => {
+  assert.match(obtenerEstadoEsperaLogin(0).descripcion, /espera una respuesta segura/i)
+  assert.match(obtenerEstadoEsperaLogin(5000).descripcion, /conexión o el tiempo de respuesta del servidor/i)
+  assert.match(obtenerEstadoEsperaLogin(5000).descripcion, /no vuelvas a enviar/i)
 })
