@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
 import AlertMessage from '../components/ui/AlertMessage'
+import FormularioContacto from '../components/contacto/FormularioContacto'
 
 export default function LandingPage() {
   const { state } = useLocation()
@@ -10,7 +11,7 @@ export default function LandingPage() {
       <header className="public-nav">
         <Link className="brand" to="/"><span className="brand__mark" />AGRO</Link>
         <nav className="public-nav__links">
-          <a href="#funciona">Cómo funciona</a><a href="#nosotros">Quiénes somos</a><a href="#acerca">Acerca de</a>
+          <a href="#funciona">Cómo funciona</a><a href="#nosotros">Quiénes somos</a><a href="#acerca">Acerca de</a><a href="#contacto">Contáctanos</a>
           <Link to="/login"><BaseButton>Iniciar sesión</BaseButton></Link>
         </nav>
       </header>
@@ -68,6 +69,9 @@ export default function LandingPage() {
             <div><h2>Empieza a llevar el control de tus cultivos.</h2><p>Crea tu cuenta y registra tu primer cultivo en pocos pasos.</p></div>
             <Link to="/registro"><BaseButton>Crear una cuenta</BaseButton></Link>
           </div>
+        </section>
+        <section id="contacto" className="contact-section">
+          <div className="contact-section__content"><FormularioContacto /></div>
         </section>
       </main>
     </>

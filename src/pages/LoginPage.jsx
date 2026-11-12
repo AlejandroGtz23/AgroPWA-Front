@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { iniciarSesion } from '../api/cliente'
 import { guardarSesion } from '../auth/sesion'
+import { obtenerEstadoEsperaLogin } from '../auth/estadoEsperaLogin.js'
 import AlertMessage from '../components/ui/AlertMessage'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
@@ -19,8 +20,17 @@ export default function LoginPage() {
   const [correoTocado, setCorreoTocado] = useState(false)
   const [contrasenaTocada, setContrasenaTocada] = useState(false)
   const [enviando, setEnviando] = useState(false)
+  const [esperaMs, setEsperaMs] = useState(0)
   const [mensaje, setMensaje] = useState('')
   const correoError = !correo.trim() ? 'El correo es obligatorio.' : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim()) ? 'Escribe un correo válido.' : ''
+  const estadoEspera = obtenerEstadoEsperaLogin(esperaMs)
+
+  useEffect(() => {
+    if (!enviando) { setEsperaMs(0); return undefined }
+    const inicio = Date.now()
+    const interval = window.setInterval(() => setEsperaMs(Date.now() - inicio), 500)
+    return () => window.clearInterval(interval)
+  }, [enviando])
 
   async function submit(event) {
     event.preventDefault()
@@ -50,7 +60,14 @@ export default function LoginPage() {
         <label className="auth-option"><input type="checkbox" checked={recordarme} onChange={(event) => setRecordarme(event.target.checked)} /> Recordarme en este dispositivo</label>
         {!online && <AlertMessage title="Sin conexión" tone="warning">Iniciar sesión requiere conexión a Internet.</AlertMessage>}
         {mensaje && <AlertMessage title="No se pudo iniciar sesión" tone="danger">{mensaje}</AlertMessage>}
-        <BaseButton type="submit" disabled={enviando}>{enviando ? 'Iniciando sesión…' : 'Iniciar sesión'}</BaseButton>
+        <BaseButton type="submit" disabled={enviando} aria-busy={enviando}>
+          {enviando && <span className="login-spinner" aria-hidden="true" />}
+          {enviando ? 'Iniciando sesión…' : 'Iniciar sesión'}
+        </BaseButton>
+        {enviando && <div className="login-wait" role="status" aria-live="polite">
+          <strong>{estadoEspera.titulo}</strong>
+          <span>{estadoEspera.descripcion}</span>
+        </div>}
       </form>
       <p className="muted">¿Olvidaste tu contraseña? <small>Recuperación próximamente.</small></p>
       <p className="muted">¿Aún no tienes cuenta? <Link to="/registro"><strong>Regístrate</strong></Link></p>
