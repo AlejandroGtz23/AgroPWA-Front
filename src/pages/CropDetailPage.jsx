@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { obtenerDetalleCultivo } from '../api/cultivos'
 import { programarEliminacionCultivo } from '../components/cultivos/gestorEliminacion'
 import AlertMessage from '../components/ui/AlertMessage'
@@ -36,6 +36,7 @@ function DialogoEliminar({ cultivo, totales, online, onCancelar, onConfirmar }) 
 export default function CropDetailPage() {
   const { cropId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const online = useOnlineStatus()
   const [detalle, setDetalle] = useState(null)
   const [pestana, setPestana] = useState('avances')
@@ -63,9 +64,12 @@ export default function CropDetailPage() {
 
   const { cultivo, avances, fotografias, totales } = detalle
   const dias = cultivo.diasCultivo ?? diasDesdeSiembra(cultivo.fechaSiembra)
-  const estadoVisual = cultivo.estado === 'Activo' ? 'success' : 'neutral'
+  const cultivoActivo = String(cultivo.estado || '').toLowerCase() === 'activo'
+  const estadoVisual = cultivoActivo ? 'success' : 'neutral'
 
   return <div className="page-shell stack crop-detail">
+    {location.state?.mensajeActividad && <AlertMessage title="Avance guardado" tone="info">{location.state.mensajeActividad}</AlertMessage>}
+    {location.state?.mensajeFotos && <AlertMessage title="Fotografías guardadas" tone="info">{location.state.mensajeFotos}</AlertMessage>}
     <div className="crop-form-heading"><Link to="/app/cultivos" aria-label="Volver a mis cultivos">←</Link><div><span className="eyebrow">P07 · Detalle del cultivo</span><h1>Detalle del cultivo</h1></div></div>
     <BaseCard className="crop-detail__main">
       <CultivoPortada src={cultivo.portadaUrl} tipo={cultivo.tipo} />
@@ -75,14 +79,21 @@ export default function CropDetailPage() {
         {[['Tipo', cultivo.tipo], ['Variedad', cultivo.variedad || '—'], ['Parcela', cultivo.parcela], ['Superficie', `${cultivo.superficieHa} ha`], ['Siembra', fechaCorta(cultivo.fechaSiembra)], ['Días de cultivo', `${dias} días`]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
       </dl>
       {cultivo.observaciones && <div className="crop-observations"><strong>Observaciones</strong><p>{cultivo.observaciones}</p></div>}
-      <div className="crop-detail__actions"><Link to={`/app/cultivos/${cropId}/editar`}><BaseButton variant="secondary">✎ Editar</BaseButton></Link><BaseButton variant="secondary" className="base-button--danger-outline" disabled={!online} title={!online ? 'La eliminación offline no está habilitada' : undefined} onClick={() => setConfirmarEliminacion(true)}>Eliminar</BaseButton><BaseButton disabled title="El registro de avances corresponde a HU-19">+ Registrar avance</BaseButton></div>
+      <div className="crop-detail__actions"><Link to={`/app/cultivos/${cropId}/editar`}><BaseButton variant="secondary">✎ Editar</BaseButton></Link><BaseButton variant="secondary" className="base-button--danger-outline" disabled={!online} title={!online ? 'La eliminación offline no está habilitada' : undefined} onClick={() => setConfirmarEliminacion(true)}>Eliminar</BaseButton>{cultivoActivo && <Link to={`/app/cultivos/${cropId}/actividad`}><BaseButton>+ Registrar avance</BaseButton></Link>}</div>
     </BaseCard>
     <div className="crop-tabs" role="tablist" aria-label="Información del cultivo">
       <button type="button" role="tab" aria-selected={pestana === 'avances'} onClick={() => setPestana('avances')}>Avances ({totales.avances})</button>
       <button type="button" role="tab" aria-selected={pestana === 'fotografias'} onClick={() => setPestana('fotografias')}>Fotografías ({totales.fotografias})</button>
     </div>
     {pestana === 'avances' && <section className="crop-timeline" aria-label="Historial de avances">
-      {avances.length ? avances.map((avance) => <BaseCard className="crop-timeline__item" key={avance.id}><div className="row row--between"><StatusTag>{avance.tipo}</StatusTag><time dateTime={avance.fechaActividad}>{fechaCorta(avance.fechaActividad)}</time></div><p>{avance.descripcion}</p><span className="muted">{avance.fotos} {avance.fotos === 1 ? 'foto' : 'fotos'}</span></BaseCard>) : <BaseCard className="crop-empty"><h2>Aún no hay avances</h2><p className="muted">El registro de avances se habilitará en HU-19.</p><BaseButton disabled>+ Registrar avance</BaseButton></BaseCard>}
+      {avances.length ? avances.map((avance) => {
+        const fotos = Array.isArray(avance.fotos) ? avance.fotos.length : Number(avance.fotos) || 0
+        return <BaseCard className="crop-timeline__item" key={avance.id}>
+          <div className="row row--between"><StatusTag>{avance.tipo}</StatusTag><time dateTime={avance.fechaActividad}>{fechaCorta(avance.fechaActividad)}</time></div>
+          <p>{avance.descripcion}</p>
+          <div className="row row--between"><span className="muted">{fotos} {fotos === 1 ? 'foto' : 'fotos'}</span><Link to={`/app/actividades/${avance.id}/fotos?cultivo=${encodeURIComponent(cropId)}`}><BaseButton variant="secondary">{fotos ? 'Agregar más fotos' : 'Agregar fotos'}</BaseButton></Link></div>
+        </BaseCard>
+      }) : <BaseCard className="crop-empty"><h2>Aún no hay avances</h2><p className="muted">Registra el primer avance para este cultivo.</p>{cultivoActivo && <Link to={`/app/cultivos/${cropId}/actividad`}><BaseButton>+ Registrar avance</BaseButton></Link>}</BaseCard>}
     </section>}
     {pestana === 'fotografias' && (fotografias.length ? <div className="crop-photo-grid">{fotografias.map((foto) => <figure key={foto.id}><img src={foto.url} alt={`Fotografía del cultivo ${cultivo.nombre}`} loading="lazy" /><figcaption>{fechaCorta(foto.fechaCaptura)}{foto.esPortada ? ' · Portada' : ''}</figcaption></figure>)}</div> : <BaseCard className="crop-empty"><h2>Aún no hay fotografías</h2><p className="muted">La captura y carga de fotografías corresponde a HU-20.</p></BaseCard>)}
     {confirmarEliminacion && <DialogoEliminar cultivo={cultivo} totales={totales} online={online} onCancelar={() => setConfirmarEliminacion(false)} onConfirmar={() => {
