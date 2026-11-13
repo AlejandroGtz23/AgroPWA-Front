@@ -15,9 +15,15 @@ export class ApiError extends Error {
 export async function solicitarApi(path, options = {}) {
   let response
   try {
+    const headers = { Accept: 'application/json', ...options.headers }
+    if (options.body instanceof FormData) {
+      Object.keys(headers).filter((name) => name.toLowerCase() === 'content-type').forEach((name) => delete headers[name])
+    } else if (options.body && !Object.keys(headers).some((name) => name.toLowerCase() === 'content-type')) {
+      headers['Content-Type'] = 'application/json'
+    }
     response = await fetch(`${apiUrl.replace(/\/+$/, '')}${path}`, {
       ...options,
-      headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers },
+      headers,
     })
   } catch {
     throw new ApiError('No fue posible conectar con el servidor. Verifica tu conexión e intenta nuevamente.', 0)
