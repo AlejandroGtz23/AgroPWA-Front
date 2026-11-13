@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { listarTiposCultivo, registrarCultivo } from '../api/cultivos'
+import { subirFotografia } from '../api/fotografias'
 import { listarParcelas } from '../api/parcelas'
 import AlertMessage from '../components/ui/AlertMessage'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
 import BaseField from '../components/ui/BaseField'
+import SelectorFotoPortada from '../components/cultivos/SelectorFotoPortada'
+import { comprimirFotografia } from '../components/cultivos/comprimirFotografia'
 import { fechaActualMexico, validarCultivo } from '../components/cultivos/reglasCultivo'
 import useOnlineStatus from '../hooks/useOnlineStatus'
 
@@ -25,6 +28,10 @@ export default function CropFormPage() {
   const [resultado, setResultado] = useState(null)
   const [resultadoIncierto, setResultadoIncierto] = useState(false)
   const [idLocal, setIdLocal] = useState(null)
+  const [portadaArchivo, setPortadaArchivo] = useState(null)
+  const [portadaIdLocal, setPortadaIdLocal] = useState(null)
+  const [portadaError, setPortadaError] = useState('')
+  const [subiendoPortada, setSubiendoPortada] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -44,6 +51,25 @@ export default function CropFormPage() {
     setForm((actual) => ({ ...actual, [name]: value }))
     setErrors((actual) => ({ ...actual, [name]: undefined }))
     setMensaje('')
+  }
+
+  async function subirPortada(cultivoCreado = resultado) {
+    if (!cultivoCreado?.id || !portadaArchivo || subiendoPortada) return
+    setSubiendoPortada(true)
+    setPortadaError('')
+    try {
+      const comprimida = await comprimirFotografia(portadaArchivo)
+      const identificadorLocal = portadaIdLocal || crypto.randomUUID()
+      setPortadaIdLocal(identificadorLocal)
+      const fotografia = await subirFotografia(cultivoCreado.id, comprimida, { esPortada: true, idLocal: identificadorLocal })
+      setResultado((actual) => ({ ...actual, portadaUrl: fotografia.url }))
+      setPortadaArchivo(null)
+      setPortadaIdLocal(null)
+    } catch (error) {
+      setPortadaError(error.message || 'El cultivo se guardó, pero no se pudo subir la foto de portada. Puedes reintentar.')
+    } finally {
+      setSubiendoPortada(false)
+    }
   }
 
   async function guardar(event) {
@@ -69,6 +95,7 @@ export default function CropFormPage() {
       const creado = await registrarCultivo(payload)
       setResultado(creado)
       setResultadoIncierto(false)
+      if (portadaArchivo) await subirPortada(creado)
     } catch (error) {
       if (error.status === 0) {
         setResultadoIncierto(true)
@@ -88,6 +115,10 @@ export default function CropFormPage() {
 
   if (resultado) return <div className="page-shell stack">
     <BaseCard className="crop-result"><span className="crop-result__check" aria-hidden="true">✓</span><span className="eyebrow">P08-A · Resultado</span><h1>¡Cultivo guardado!</h1><p>Tu registro se guardó en línea correctamente.</p>
+      {subiendoPortada && <p role="status">Subiendo foto de portada…</p>}
+      {portadaError && <AlertMessage title="Foto de portada pendiente" tone="warning">{portadaError}</AlertMessage>}
+      {portadaArchivo && !subiendoPortada && <BaseButton variant="secondary" onClick={() => subirPortada(resultado)}>Reintentar foto de portada</BaseButton>}
+      {resultado.portadaUrl && <img className="crop-photo-note__preview" src={resultado.portadaUrl} alt={`Foto de portada de ${resultado.nombre}`} />}
       <dl className="crop-summary"><div><dt>Nombre</dt><dd>{resultado.nombre}</dd></div><div><dt>Tipo</dt><dd>{resultado.tipo}</dd></div><div><dt>Parcela</dt><dd>{resultado.parcela}</dd></div><div><dt>Fecha de siembra</dt><dd>{resultado.fechaSiembra}</dd></div></dl>
       <div className="form-actions"><Link to="/app/cultivos"><BaseButton variant="secondary">Ver mis cultivos</BaseButton></Link><Link to={`/app/cultivos/${resultado.id}`}><BaseButton>Ver detalle</BaseButton></Link></div>
     </BaseCard>
@@ -112,7 +143,7 @@ export default function CropFormPage() {
       {!cargandoCatalogos && parcelas.length === 0 && <AlertMessage title="Necesitas una parcela" tone="info">Registra primero una parcela en <Link to="/app/perfil">Mi perfil</Link>.</AlertMessage>}
       {parcelaSeleccionada && <div className="crop-parcel-summary"><span>Superficie</span><strong>{parcelaSeleccionada.superficieHa} ha</strong>{parcelaSeleccionada.ubicacionReferencia && <><span>Ubicación</span><strong>{parcelaSeleccionada.ubicacionReferencia}</strong></>}</div>}
       <div className="base-field"><label htmlFor="cultivo-observaciones">Observaciones</label><textarea id="cultivo-observaciones" name="observaciones" value={form.observaciones} onChange={cambiar} maxLength={300} disabled={resultadoIncierto || guardando} aria-invalid={errors.observaciones ? true : undefined} aria-describedby="cultivo-observaciones-ayuda" placeholder="Información adicional" />{errors.observaciones && <small role="alert">{errors.observaciones}</small>}<small id="cultivo-observaciones-ayuda" className="muted">{form.observaciones.length} / 300 caracteres</small></div>
-      <div className="crop-photo-note"><span aria-hidden="true">▣</span><strong>La foto de portada se habilitará en la historia de fotografías</strong><small>JPG o PNG · máximo 5 MB</small></div>
+       <SelectorFotoPortada archivo={portadaArchivo} onChange={(archivo) => { setPortadaArchivo(archivo); setPortadaIdLocal(null) }} disabled={resultadoIncierto || guardando || !online} />
       <AlertMessage title="Guardado en línea" tone="info">La captura y consulta sin conexión quedan pendientes hasta acordar el aislamiento por usuario y la cola de sincronización.</AlertMessage>
       <div className="form-actions"><BaseButton variant="secondary" disabled={guardando} onClick={() => navigate('/app/cultivos')}>Cancelar</BaseButton><BaseButton type="submit" disabled={guardando || cargandoCatalogos}>{guardando ? 'Guardando…' : resultadoIncierto ? 'Reintentar guardado' : 'Guardar cultivo'}</BaseButton></div>
     </form></BaseCard>
