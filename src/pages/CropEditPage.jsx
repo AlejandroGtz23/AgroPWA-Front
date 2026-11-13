@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { editarCultivo, listarTiposCultivo, obtenerDetalleCultivo } from '../api/cultivos'
+import { subirFotografia } from '../api/fotografias'
 import { listarParcelas } from '../api/parcelas'
 import AlertMessage from '../components/ui/AlertMessage'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
 import BaseField from '../components/ui/BaseField'
+import SelectorFotoPortada from '../components/cultivos/SelectorFotoPortada'
+import { comprimirFotografia } from '../components/cultivos/comprimirFotografia'
 import { fechaActualMexico } from '../components/cultivos/reglasCultivo'
 import { validarEdicionCultivo } from '../components/cultivos/reglasEdicionCultivo'
 import useOnlineStatus from '../hooks/useOnlineStatus'
@@ -49,7 +52,12 @@ export default function CropEditPage() {
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState(null)
   const [intento, setIntento] = useState(0)
-  const dirty = useMemo(() => JSON.stringify(form) !== JSON.stringify(original), [form, original])
+  const [portadaArchivo, setPortadaArchivo] = useState(null)
+  const [portadaIdLocal, setPortadaIdLocal] = useState(null)
+  const [portadaError, setPortadaError] = useState('')
+  const [subiendoPortada, setSubiendoPortada] = useState(false)
+  const formDirty = useMemo(() => JSON.stringify(form) !== JSON.stringify(original), [form, original])
+  const dirty = formDirty || Boolean(portadaArchivo)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -86,6 +94,27 @@ export default function CropEditPage() {
     navigate(`/app/cultivos/${cropId}`)
   }
 
+  async function subirPortada(cultivoActualizado) {
+    if (!portadaArchivo || !cultivoActualizado?.id || subiendoPortada) return false
+    setSubiendoPortada(true)
+    setPortadaError('')
+    const identificadorLocal = portadaIdLocal || crypto.randomUUID()
+    setPortadaIdLocal(identificadorLocal)
+    try {
+      const comprimida = await comprimirFotografia(portadaArchivo)
+      const fotografia = await subirFotografia(cultivoActualizado.id, comprimida, { esPortada: true, idLocal: identificadorLocal })
+      setCultivo((actual) => ({ ...actual, portadaUrl: fotografia.url }))
+      setPortadaArchivo(null)
+      setPortadaIdLocal(null)
+      return true
+    } catch (error) {
+      setPortadaError(error.message || 'No se pudo subir la foto de portada. Puedes reintentar.')
+      return false
+    } finally {
+      setSubiendoPortada(false)
+    }
+  }
+
   async function guardar(event) {
     event.preventDefault()
     const validacion = validarEdicionCultivo(form, hoy)
@@ -96,25 +125,28 @@ export default function CropEditPage() {
 
     setGuardando(true)
     setMensaje(null)
-    const payload = {
-      nombre: form.nombre.trim(),
-      idTipoCultivo: Number(form.idTipoCultivo),
-      variedad: form.variedad.trim() || null,
-      fechaSiembra: form.fechaSiembra,
-      idParcela: Number(form.idParcela),
-      estado: form.estado,
-      fechaCosecha: form.estado === 'finalizado' ? form.fechaCosecha : null,
-      observaciones: form.observaciones.trim() || null,
-    }
-
     try {
-      const actualizado = await editarCultivo(cropId, payload)
-      const actualizadoCultivo = actualizado?.cultivo || actualizado || { ...cultivo, ...payload }
-      setCultivo(actualizadoCultivo)
-      const valores = valoresDeCultivo(actualizadoCultivo)
-      setForm(valores)
-      setOriginal(valores)
-      setMensaje({ tipo: 'exito', texto: 'Cambios guardados correctamente.' })
+      let actualizadoCultivo = cultivo
+      if (formDirty) {
+        const payload = {
+          nombre: form.nombre.trim(),
+          idTipoCultivo: Number(form.idTipoCultivo),
+          variedad: form.variedad.trim() || null,
+          fechaSiembra: form.fechaSiembra,
+          idParcela: Number(form.idParcela),
+          estado: form.estado,
+          fechaCosecha: form.estado === 'finalizado' ? form.fechaCosecha : null,
+          observaciones: form.observaciones.trim() || null,
+        }
+        const actualizado = await editarCultivo(cropId, payload)
+        actualizadoCultivo = actualizado?.cultivo || actualizado || { ...cultivo, ...payload }
+        setCultivo(actualizadoCultivo)
+        const valores = valoresDeCultivo(actualizadoCultivo)
+        setForm(valores)
+        setOriginal(valores)
+      }
+      const portadaGuardada = portadaArchivo ? await subirPortada(actualizadoCultivo) : true
+      setMensaje({ tipo: 'exito', texto: portadaGuardada ? 'Cambios guardados correctamente.' : 'Los datos se guardaron, pero la foto de portada sigue pendiente.' })
     } catch (error) {
       if (error.status === 400 && Object.keys(error.errors || {}).length) {
         const mapa = { Nombre: 'nombre', IdTipoCultivo: 'idTipoCultivo', FechaSiembra: 'fechaSiembra', IdParcela: 'idParcela', Estado: 'estado', FechaCosecha: 'fechaCosecha', Variedad: 'variedad', Observaciones: 'observaciones' }
@@ -156,8 +188,10 @@ export default function CropEditPage() {
       {parcelaSeleccionada && <div className="crop-parcel-summary"><span>Superficie</span><strong>{parcelaSeleccionada.superficieHa} ha</strong>{parcelaSeleccionada.ubicacionReferencia && <><span>Ubicación</span><strong>{parcelaSeleccionada.ubicacionReferencia}</strong></>}</div>}
       <BaseField id="editar-estado" name="estado" label="Estado del cultivo *" as="select" value={form.estado} onChange={cambiar} error={errors.estado} required disabled={guardando}><option value="activo">Activo</option><option value="finalizado">Finalizado</option><option value="perdido">Perdido</option></BaseField>
       {form.estado === 'finalizado' && <BaseField id="editar-cosecha" name="fechaCosecha" label="Fecha de cosecha *" type="date" value={form.fechaCosecha} onChange={cambiar} error={errors.fechaCosecha} min={form.fechaSiembra} max={hoy} required disabled={guardando} />}
-      <div className="base-field"><label htmlFor="editar-observaciones">Observaciones</label><textarea id="editar-observaciones" name="observaciones" value={form.observaciones} onChange={cambiar} maxLength={300} disabled={guardando} aria-invalid={errors.observaciones ? true : undefined} aria-describedby="editar-observaciones-ayuda" />{errors.observaciones && <small role="alert">{errors.observaciones}</small>}<small id="editar-observaciones-ayuda" className="muted">{form.observaciones.length} / 300 caracteres</small></div>
-      <div className="form-actions"><BaseButton variant="secondary" disabled={guardando} onClick={cancelar}>Cancelar</BaseButton><BaseButton type="submit" disabled={guardando || !online}>{guardando ? 'Guardando…' : 'Guardar cambios'}</BaseButton></div>
+       <div className="base-field"><label htmlFor="editar-observaciones">Observaciones</label><textarea id="editar-observaciones" name="observaciones" value={form.observaciones} onChange={cambiar} maxLength={300} disabled={guardando} aria-invalid={errors.observaciones ? true : undefined} aria-describedby="editar-observaciones-ayuda" />{errors.observaciones && <small role="alert">{errors.observaciones}</small>}<small id="editar-observaciones-ayuda" className="muted">{form.observaciones.length} / 300 caracteres</small></div>
+       <SelectorFotoPortada archivo={portadaArchivo} src={cultivo.portadaUrl} onChange={(archivo) => { setPortadaArchivo(archivo); setPortadaIdLocal(null); setPortadaError('') }} disabled={guardando || !online} />
+       {portadaError && <AlertMessage title="Foto de portada pendiente" tone="warning">{portadaError}</AlertMessage>}
+       <div className="form-actions"><BaseButton variant="secondary" disabled={guardando} onClick={cancelar}>Cancelar</BaseButton><BaseButton type="submit" disabled={guardando || !online}>{guardando ? 'Guardando…' : 'Guardar cambios'}</BaseButton></div>
     </form></BaseCard>
   </div>
 }
