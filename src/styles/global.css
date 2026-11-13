@@ -127,6 +127,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .crop-list { display: grid; gap: var(--space-4); }
 .photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 .photo-placeholder { min-height: 12rem; border-radius: var(--radius-md); background: linear-gradient(#87a879 65%, #365f43 65%); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.activity-form__columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.activity-photo { display: grid; align-content: start; gap: var(--space-2); min-width: 0; margin: 0; }
+.activity-photo img { display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius-sm); object-fit: cover; background: var(--color-primary-100); }
+.activity-photo figcaption { overflow-wrap: anywhere; color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.activity-photo small { color: var(--color-danger); }
+.activity-photo__pickers { flex-wrap: wrap; }
 
 .crop-toolbar { display: grid; grid-template-columns: minmax(14rem, 1fr) minmax(12rem, 0.35fr) auto; gap: var(--space-3); align-items: end; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 .crop-filter-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
@@ -166,6 +173,8 @@ button.crop-filter { cursor: pointer; }
 .crop-photo-note { display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-5); border: 1px dashed var(--color-primary-600); border-radius: var(--radius-md); color: var(--color-primary-600); text-align: center; }
 .crop-photo-note > span { font-size: 1.5rem; }
 .crop-photo-note small { color: var(--color-text-muted); }
+.crop-photo-note__preview { display: block; width: min(100%, 18rem); max-height: 14rem; border-radius: var(--radius-sm); object-fit: cover; }
+.selector-foto__button { cursor: pointer; }
 .crop-result { display: grid; justify-items: center; gap: var(--space-4); max-width: 42rem; margin-inline: auto; text-align: center; }
 .crop-result h1, .crop-result p { margin: 0; }
 .crop-result__check { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%; color: white; background: var(--color-primary-600); font-size: 1.75rem; }
@@ -253,7 +262,9 @@ button.crop-filter { cursor: pointer; }
   .crop-pagination { padding-bottom: var(--space-4); }
   .crop-add { position: fixed; z-index: 2; right: 1.25rem; bottom: calc(var(--bottom-nav-height) + 1rem); display: grid; place-items: center; width: 3.75rem; aspect-ratio: 1; border-radius: 50%; color: white; background: var(--color-primary-600); box-shadow: var(--shadow-card); font-size: 2rem; }
   .crop-form__columns, .crop-summary { grid-template-columns: 1fr; }
+  .activity-form__columns { grid-template-columns: 1fr; }
   .crop-detail__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .crop-timeline__item .row--between { align-items: flex-start; flex-wrap: wrap; }
   .crop-detail__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .crop-detail__actions .base-button:last-child { grid-column: 1 / -1; }
   .contact-section { padding: var(--space-10) var(--space-4); }
