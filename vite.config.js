@@ -10,6 +10,7 @@ export default defineConfig({
       injectRegister: false,
       registerType: 'autoUpdate',
       manifestFilename: 'manifest.json',
+      includeAssets: ['agro-campo.jpeg', 'agro-campo-valle.jpeg'],
       manifest: {
         name: 'Agro',
         short_name: 'Agro',

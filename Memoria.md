@@ -7,7 +7,7 @@
 - La API configurada tiene entornos local y Azure; `VITE_API_URL` es pública y se define en compilación.
 - Sprint 5: dashboard y parcelas en línea integrados por el flujo de PR y confirmados por el usuario como correctos en Azure.
 - Sprint 6: HU-14/15/16 se integraron hasta `main`. El usuario confirmó producción de Sprint 5, pero aún no confirmó el despliegue de Sprint 6.
-- Sprint 7: ramas `Sprint7_Alejandro` y `Sprint7` creadas desde `develop`. Sprint 8 inició en `Sprint8_Alejandro`: implementación frontend online de HU-19/20 en curso; offline y sincronización siguen pendientes hasta acordar aislamiento por usuario.
+- Sprint 7 está integrado en `develop`. Sprint 8 (HU-19/20) se integró por PR #39 a `Sprint8`, PR #40 a `develop`, PR #41 a `release` y PR #42 a `main`; las referencias remotas se actualizaron el 19 de noviembre de 2026. El frontend de las funciones online está implementado, aunque la validación integral contra la API desplegada continúa pendiente; offline y sincronización siguen bloqueados hasta acordar aislamiento por usuario.
 - Login: el frontend realiza una sola petición `POST /api/auth/login`, sin demora artificial ni reintento. Se añadió progreso y orientación después de 5 s; la causa real debe medirse en navegador/API/Azure.
 - No hay acceso de datos offline autenticado: IndexedDB tiene almacenes básicos, pero no flujo de negocio ni aislamiento de usuarios acordado.
 
@@ -20,6 +20,7 @@
 - El acceso offline, la fecha real de expiración de la sesión y el motivo de cierre son temas para la daily. HU-11 tiene cierre local y remoto, pendiente de pruebas integrales y sincronización real.
 - La cola IndexedDB aún no tiene contrato de estados ni aislamiento por usuario: el aviso de logout cuenta todos los registros de forma conservadora y no los borra. La sincronización real no está implementada.
 - HU-13: el selector de parcela se incorporó al formulario en línea de HU-14. HU-19/20: registro de actividades y fotografías en implementación online; no se habilita almacenamiento offline hasta acordar aislamiento de datos por usuario. Un alta con respuesta incierta usa `idLocal` para reintentar sin duplicar.
+- En la rama local de estabilización, el selector de cultivos del formulario HU-19 usa páginas de 20; la API admite hasta 50 por solicitud. Esta corrección aún no se integra ni despliega. La experiencia offline no está habilitada.
 
 ## Colaboración
 
