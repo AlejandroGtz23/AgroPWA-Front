@@ -92,24 +92,26 @@ export default function RegisterPage() {
 
   const field = (name, label, props = {}) => <BaseField id={`registro-${name}`} name={name} label={label} value={values[name]} onChange={update} onBlur={() => setTouched((current) => ({ ...current, [name]: true }))} error={fieldError(name)} {...props} />
 
-  return <AuthShell title="Comienza a organizar tus cultivos.">
-    <BaseCard className="auth-card">
-      <span className="eyebrow">P03 · Registro</span><h1>Crear cuenta</h1><p className="muted">Completa tus datos para comenzar como productor.</p>
-      <form className="form-grid" onSubmit={submit} noValidate>
-        {field('nombre', 'Nombre *', { autoComplete: 'given-name', maxLength: 60, required: true })}
-        {field('apellidoPaterno', 'Apellido paterno *', { maxLength: 60, required: true })}
-        {field('apellidoMaterno', 'Apellido materno (opcional)', { maxLength: 60 })}
-        {field('correo', 'Correo electrónico *', { type: 'email', autoComplete: 'email', maxLength: 150, required: true })}
-        {field('telefono', 'Teléfono (opcional)', { type: 'tel', inputMode: 'numeric', autoComplete: 'tel', maxLength: 10 })}
-        {field('fechaNacimiento', 'Fecha de nacimiento *', { type: 'date', autoComplete: 'bday', required: true })}
-        {field('contrasena', 'Contraseña *', { type: 'password', autoComplete: 'new-password', maxLength: 72, required: true })}
-        {field('confirmacion', 'Confirmar contraseña *', { type: 'password', autoComplete: 'new-password', maxLength: 72, required: true })}
-        <div className="terms-field"><label><input type="checkbox" name="aceptaTerminos" checked={values.aceptaTerminos} onChange={update} aria-invalid={fieldError('aceptaTerminos') ? true : undefined} aria-describedby={fieldError('aceptaTerminos') ? 'terminos-error' : undefined} /> Acepto los términos de uso y el aviso de privacidad *</label>{fieldError('aceptaTerminos') && <small id="terminos-error" role="alert">{fieldError('aceptaTerminos')}</small>}</div>
+  return <AuthShell className="auth-page--register" title="Comienza a organizar tus cultivos.">
+    <BaseCard className="auth-card auth-card--register">
+      <span className="eyebrow">CREA TU ESPACIO</span><h1>Crear cuenta</h1><p className="muted">Completa tus datos para comenzar.</p>
+      <form className="form-grid register-form" onSubmit={submit} noValidate>
+        <div className="register-fields">
+          {field('nombre', 'Nombre *', { className: 'register-field', autoComplete: 'given-name', maxLength: 60, required: true })}
+          {field('apellidoPaterno', 'Apellido paterno *', { className: 'register-field', autoComplete: 'family-name', maxLength: 60, required: true })}
+          {field('apellidoMaterno', 'Apellido materno (opcional)', { className: 'register-field', maxLength: 60 })}
+          {field('telefono', 'Teléfono (opcional)', { className: 'register-field', type: 'tel', inputMode: 'numeric', autoComplete: 'tel', maxLength: 10 })}
+          {field('correo', 'Correo electrónico *', { className: 'register-field register-field--wide', type: 'email', autoComplete: 'email', maxLength: 150, required: true })}
+          {field('fechaNacimiento', 'Fecha de nacimiento *', { className: 'register-field', type: 'date', autoComplete: 'bday', required: true })}
+          {field('contrasena', 'Contraseña *', { className: 'register-field', type: 'password', autoComplete: 'new-password', maxLength: 72, required: true })}
+          {field('confirmacion', 'Confirmar contraseña *', { className: 'register-field', type: 'password', autoComplete: 'new-password', maxLength: 72, required: true })}
+          <div className="terms-field register-terms"><label><input type="checkbox" name="aceptaTerminos" checked={values.aceptaTerminos} onChange={update} aria-invalid={fieldError('aceptaTerminos') ? true : undefined} aria-describedby={fieldError('aceptaTerminos') ? 'terminos-error' : undefined} /> Acepto los términos de uso y el aviso de privacidad *</label>{fieldError('aceptaTerminos') && <small id="terminos-error" role="alert">{fieldError('aceptaTerminos')}</small>}</div>
+        </div>
         {!online && <AlertMessage title="Sin conexión" tone="warning">El registro requiere conexión a Internet.</AlertMessage>}
-        {message && <AlertMessage title="No se pudo completar la sesión" tone="danger">{message}</AlertMessage>}
+        {message && <AlertMessage title="No se pudo completar el registro" tone="danger">{message}</AlertMessage>}
         <BaseButton type="submit" disabled={accountCreated || submitting || Object.keys(errors).some((name) => touched[name])}>{submitting ? 'Creando cuenta…' : 'Crear cuenta'}</BaseButton>
       </form>
-      <p className="muted">¿Ya tienes cuenta? <Link to="/login"><strong>Inicia sesión</strong></Link></p>
+      <p className="muted register-foot">¿Ya tienes cuenta? <Link to="/login"><strong>Inicia sesión</strong></Link></p>
     </BaseCard>
   </AuthShell>
 }

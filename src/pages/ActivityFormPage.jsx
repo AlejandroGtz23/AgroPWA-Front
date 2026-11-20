@@ -7,6 +7,7 @@ import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
 import BaseField from '../components/ui/BaseField'
 import { esTipoActividad, validarActividad } from '../components/cultivos/reglasActividad'
+import { calcularTotalPaginas, TAMANO_PAGINA_CULTIVOS } from '../components/cultivos/paginacion'
 import { fechaActualMexico } from '../components/cultivos/reglasCultivo'
 import useOnlineStatus from '../hooks/useOnlineStatus'
 
@@ -49,6 +50,10 @@ export default function ActivityFormPage() {
   const [form, setForm] = useState(() => formularioInicial(hoy))
   const [tipos, setTipos] = useState([])
   const [cultivos, setCultivos] = useState([])
+  const [totalCultivos, setTotalCultivos] = useState(0)
+  const [paginaCultivos, setPaginaCultivos] = useState(1)
+  const [estadoListaCultivos, setEstadoListaCultivos] = useState('cargando')
+  const [reintentoListaCultivos, setReintentoListaCultivos] = useState(0)
   const [cultivo, setCultivo] = useState(null)
   const [estado, setEstado] = useState('cargando')
   const [errores, setErrores] = useState({})
@@ -61,17 +66,12 @@ export default function ActivityFormPage() {
     setEstado('cargando')
     Promise.all([
       listarTiposActividad({ signal: controller.signal }),
-      listarCultivos({ estado: 'activo', pagina: 1, tamano: 100, signal: controller.signal }),
       obtenerDetalleCultivo(cropId, { signal: controller.signal }),
-    ]).then(([listaTipos, respuestaCultivos, detalle]) => {
+    ]).then(([listaTipos, detalle]) => {
       if (controller.signal.aborted) return
-      const opciones = respuestaCultivos.elementos || []
       const cultivoActual = detalle.cultivo
       setTipos(Array.isArray(listaTipos) ? listaTipos : [])
       setCultivo(cultivoActual)
-      setCultivos(opciones.some((item) => String(item.id) === String(cultivoActual.id))
-        ? opciones
-        : [cultivoActual, ...opciones])
       setEstado(estaActivo(cultivoActual) ? 'listo' : 'inactivo')
     }).catch((error) => {
       if (!controller.signal.aborted) {
@@ -84,12 +84,46 @@ export default function ActivityFormPage() {
     return () => controller.abort()
   }, [cropId])
 
+  useEffect(() => {
+    const controller = new AbortController()
+    setEstadoListaCultivos('cargando')
+    setCultivos([])
+    listarCultivos({
+      estado: 'activo',
+      pagina: paginaCultivos,
+      tamano: TAMANO_PAGINA_CULTIVOS,
+      signal: controller.signal,
+    }).then((respuesta) => {
+      if (controller.signal.aborted) return
+      const elementos = Array.isArray(respuesta.elementos) ? respuesta.elementos : []
+      const totalInformado = respuesta.total
+      const total = totalInformado !== undefined && totalInformado !== null && Number.isFinite(Number(totalInformado))
+        ? Number(totalInformado)
+        : elementos.length
+      const ultimaPagina = calcularTotalPaginas(total, TAMANO_PAGINA_CULTIVOS)
+      if (paginaCultivos > ultimaPagina) {
+        setPaginaCultivos(ultimaPagina)
+        return
+      }
+      setCultivos(elementos)
+      setTotalCultivos(total)
+      setEstadoListaCultivos('listo')
+    }).catch(() => {
+      if (!controller.signal.aborted) setEstadoListaCultivos('error')
+    })
+    return () => controller.abort()
+  }, [paginaCultivos, reintentoListaCultivos])
+
   const tipoSeleccionado = useMemo(
     () => tipos.find((tipo) => String(tipo.id) === form.idTipoActividad),
     [tipos, form.idTipoActividad],
   )
   const esRiego = esTipoActividad(tipoSeleccionado?.nombre, 'riego')
   const esFertilizacion = esTipoActividad(tipoSeleccionado?.nombre, 'fertilizacion')
+  const totalPaginasCultivos = calcularTotalPaginas(totalCultivos, TAMANO_PAGINA_CULTIVOS)
+  const cultivosVisibles = cultivo && !cultivos.some((item) => String(item.id) === String(cultivo.id))
+    ? [cultivo, ...cultivos]
+    : cultivos
 
   function cambiar(event) {
     const { name, value } = event.target
@@ -154,20 +188,41 @@ export default function ActivityFormPage() {
     <BaseCard>
       <form className="form-grid activity-form" onSubmit={guardar} noValidate>
         <p className="muted">Los campos con * son obligatorios.</p>
-        <BaseField
-          id="actividad-cultivo"
-          label="Cultivo *"
-          as="select"
-          value={cropId}
-          onChange={(event) => navigate(`/app/cultivos/${event.target.value}/actividad`)}
-          disabled={estado !== 'listo' || guardando}
-          required
-        >
-          <option value="">Seleccionar cultivo</option>
-          {cultivos.filter(estaActivo).map((item) => (
-            <option value={item.id} key={item.id}>{item.nombre} · {item.parcela}</option>
-          ))}
-        </BaseField>
+        <div className="activity-crop-picker">
+          <BaseField
+            id="actividad-cultivo"
+            label="Cultivo *"
+            as="select"
+            value={cropId}
+            onChange={(event) => navigate(`/app/cultivos/${event.target.value}/actividad`)}
+            disabled={estado !== 'listo' || estadoListaCultivos !== 'listo' || guardando}
+            required
+          >
+            <option value="">Seleccionar cultivo</option>
+            {cultivosVisibles.filter(estaActivo).map((item) => (
+              <option value={item.id} key={item.id}>{item.nombre} · {item.parcela}</option>
+            ))}
+          </BaseField>
+          {estadoListaCultivos === 'cargando' && <p className="activity-crop-picker__status" role="status">Cargando cultivos activos…</p>}
+          {estadoListaCultivos === 'error' && (
+            <AlertMessage title="No se pudo cargar la lista de cultivos" tone="warning">
+              <span>El selector muestra únicamente el cultivo actual. Intenta cargar la lista de nuevo.</span>
+              <BaseButton variant="secondary" type="button" onClick={() => setReintentoListaCultivos((valor) => valor + 1)}>Reintentar</BaseButton>
+            </AlertMessage>
+          )}
+          {estadoListaCultivos === 'listo' && totalCultivos > TAMANO_PAGINA_CULTIVOS && (
+            <div className="activity-crop-picker__pagination" aria-label="Paginación de cultivos activos">
+              <span aria-live="polite">Página {paginaCultivos} de {totalPaginasCultivos} · {totalCultivos} cultivos activos</span>
+              <div className="row">
+                <BaseButton variant="secondary" type="button" aria-label="Cultivos anteriores" disabled={paginaCultivos <= 1 || guardando} onClick={() => setPaginaCultivos((pagina) => Math.max(1, pagina - 1))}>Anterior</BaseButton>
+                <BaseButton variant="secondary" type="button" aria-label="Más cultivos" disabled={paginaCultivos >= totalPaginasCultivos || guardando} onClick={() => setPaginaCultivos((pagina) => Math.min(totalPaginasCultivos, pagina + 1))}>Siguiente</BaseButton>
+              </div>
+            </div>
+          )}
+          {estadoListaCultivos === 'listo' && totalCultivos <= TAMANO_PAGINA_CULTIVOS && (
+            <p className="activity-crop-picker__status">{totalCultivos} {totalCultivos === 1 ? 'cultivo activo' : 'cultivos activos'}</p>
+          )}
+        </div>
         <BaseField id="actividad-tipo" name="idTipoActividad" label="Tipo de actividad *" as="select" value={form.idTipoActividad} onChange={cambiar} error={errores.idTipoActividad} required disabled={estado !== 'listo' || guardando}>
           <option value="">Seleccionar tipo</option>
           {tipos.map((tipo) => <option value={tipo.id} key={tipo.id}>{tipo.nombre}</option>)}

@@ -80,7 +80,6 @@ export default function FormularioContacto() {
       <h2>¿Tienes dudas o sugerencias?</h2>
       <p>Escríbenos y con gusto te ayudamos a empezar.</p>
       <dl className="contact-details">
-        <div><dt><span aria-hidden="true">@</span> Correo</dt><dd><a href="mailto:contacto@agro-app.mx">contacto@agro-app.mx</a></dd></div>
         <div><dt><span aria-hidden="true">⌖</span> Ubicación</dt><dd>Tula de Allende, Hidalgo, México</dd></div>
         <div><dt><span aria-hidden="true">◷</span> Horario de atención</dt><dd>Lunes a viernes, 9:00 – 17:00</dd></div>
       </dl>
