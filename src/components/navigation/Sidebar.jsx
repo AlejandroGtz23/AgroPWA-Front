@@ -17,7 +17,7 @@ export default function Sidebar() {
         {links.map(([label, to]) => <NavLink key={to} to={to} end={to === '/app'}>{label}</NavLink>)}
       </nav>
       <CerrarSesion />
-      <small>Modo PWA · Sprint 1</small>
+      <small>Agro · Gestión de cultivos</small>
     </aside>
   )
 }
