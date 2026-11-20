@@ -75,6 +75,6 @@ export default function LoginPage() {
   </AuthShell>
 }
 
-export function AuthShell({ title, children }) {
-  return <main className="auth-page"><aside className="auth-page__aside"><Link className="brand" to="/"><span className="brand__mark" />AGRO</Link><h1>{title}</h1><p>Organiza y consulta la información de tus cultivos.</p></aside><section className="auth-page__form">{children}</section></main>
+export function AuthShell({ title, children, className = '' }) {
+  return <main className={`auth-page ${className}`}><aside className="auth-page__aside"><Link className="brand" to="/"><span className="brand__mark" />AGRO</Link><h1>{title}</h1><p>Organiza y consulta la información de tus cultivos.</p></aside><section className="auth-page__form">{children}</section></main>
 }

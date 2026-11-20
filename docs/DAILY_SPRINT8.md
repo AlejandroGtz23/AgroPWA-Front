@@ -19,7 +19,12 @@
 2. Jira frontend permite archivos de hasta 10 MB, pero SCRUM-56 y su API fijan 5 MB. El frontend aplica provisionalmente 5 MB para evitar rechazos previsibles; confirmar y alinear formalmente el criterio.
 3. Confirmar en API real catálogo, forma del detalle, respuestas de carga multipart, `idLocal` e integración de foto de portada.
 4. Probar cámara/galería en un celular real y revisar los diseños responsive a 390 px y 1440 px.
-5. No se modificó backend ni Jira. No hay commit, push, PR ni merge.
+5. No se modificó backend ni Jira. En la fecha de esta implementación no había commit, push, PR ni merge.
+
+## Cierre e integración posterior
+
+- El 19 de noviembre de 2026 se actualizaron las referencias remotas y se confirmó la integración de Sprint 8: PR #39 (`Sprint8_Alejandro` → `Sprint8`), PR #40 (`Sprint8` → `develop`), PR #41 (`develop` → `release`) y PR #42 (`release` → `main`).
+- La estabilización visual y el paginado adicional del selector se trabajan aparte en la rama personal autorizada por el usuario; todavía no están integrados ni desplegados.
 
 ## Validación local
 

@@ -6,13 +6,11 @@ import AlertMessage from '../components/ui/AlertMessage'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
 import StatusTag from '../components/ui/StatusTag'
+import useOnlineStatus from '../hooks/useOnlineStatus'
 
 export default function DashboardPage() {
-  const userId = obtenerSesion()?.usuario?.id
-  const claveGuia = `agro.guia.oculta.${userId}`
-  const [guiaOculta, setGuiaOculta] = useState(() => {
-    try { return localStorage.getItem(claveGuia) === 'true' } catch { return false }
-  })
+  const online = useOnlineStatus()
+  const nombreSesion = obtenerSesion()?.usuario?.nombre
   const [resumen, setResumen] = useState(null)
   const [estado, setEstado] = useState('cargando')
   const cargar = useCallback(async (signal) => {
@@ -33,24 +31,30 @@ export default function DashboardPage() {
     return () => controller.abort()
   }, [cargar])
 
-  function alternarGuia() {
-    const siguiente = !guiaOculta
-    setGuiaOculta(siguiente)
-    try { localStorage.setItem(claveGuia, String(siguiente)) } catch { /* Preferencia solo para esta visita. */ }
-  }
-
-  const hoy = new Intl.DateTimeFormat('es-MX', { dateStyle: 'full' }).format(new Date())
-  const pasos = resumen ? [['Registra una parcela', resumen.guia.tieneParcela], ['Registra un cultivo', resumen.guia.tieneCultivo], ['Registra un avance', resumen.guia.tieneAvance]] : []
+  const hoy = new Intl.DateTimeFormat('es-MX', { dateStyle: 'long' }).format(new Date())
+  const actividadReciente = resumen?.actividadReciente?.slice(0, 3) || []
 
   return <div className="page-shell stack">
-    <div className="page-heading"><span className="eyebrow">P04 · Dashboard</span><h1>Hola{resumen?.nombre ? `, ${resumen.nombre}` : ''}</h1><p>{hoy} · Resumen general de tus cultivos.</p></div>
+    <div className="dashboard-welcome">
+      <div className="page-heading"><span className="eyebrow">{hoy}</span><h1>Hola{resumen?.nombre || nombreSesion ? `, ${resumen?.nombre || nombreSesion}` : ''}</h1></div>
+      <Link to="/app/cultivos/nuevo"><BaseButton>+ Registrar cultivo</BaseButton></Link>
+      <StatusTag tone={online ? 'success' : 'warning'}>{online ? 'En línea' : 'Sin conexión'}</StatusTag>
+    </div>
     {estado === 'cargando' && <p role="status">Cargando resumen…</p>}
     {estado === 'error' && <AlertMessage title="No se pudo cargar tu resumen" tone="warning">Verifica la conexión e inténtalo de nuevo. El dashboard sin conexión aún no está disponible. <BaseButton variant="secondary" onClick={() => cargar()}>Reintentar</BaseButton></AlertMessage>}
     {estado === 'listo' && <>
-      <section className="stats-grid" aria-label="Resumen"><div className="stat"><strong>{resumen.cultivosActivos}</strong><span>Cultivos activos</span></div><div className="stat"><strong>{resumen.avancesDelMes}</strong><span>Avances del mes</span></div><div className="stat"><strong>—</strong><span>Pendientes de sincronizar: no disponible</span></div></section>
-      <BaseCard className="stack"><div className="row row--between"><h2>¿Cómo usar Agro?</h2><BaseButton variant="secondary" onClick={alternarGuia}>{guiaOculta ? 'Mostrar guía' : 'Ocultar guía'}</BaseButton></div>{!guiaOculta && <ul>{pasos.map(([titulo, completado]) => <li key={titulo}>{completado ? '✓' : '○'} {titulo}</li>)}</ul>}</BaseCard>
-      <BaseCard className="stack"><h2>Actividad reciente</h2>{resumen.actividadReciente.length ? resumen.actividadReciente.map((actividad, index) => <div className="row row--between" key={`${actividad.fecha}-${index}`}><div><strong>{actividad.cultivo}</strong><p className="muted">{new Date(actividad.fecha).toLocaleString('es-MX')}</p></div><StatusTag>{actividad.tipo}</StatusTag></div>) : <p className="muted">Aún no hay actividad registrada.</p>}</BaseCard>
+      <section className="stats-grid" aria-label="Resumen">
+        <BaseCard className="stat"><span>Cultivos activos</span><strong>{resumen.cultivosActivos}</strong></BaseCard>
+        <BaseCard className="stat"><span>Avances este mes</span><strong>{resumen.avancesDelMes}</strong></BaseCard>
+      </section>
+      <BaseCard className="dashboard-recent">
+        <div className="dashboard-section-heading"><h2>Actividad reciente</h2><Link to="/app/cultivos">Ver cultivos <span aria-hidden="true">→</span></Link></div>
+        {actividadReciente.length ? <div className="dashboard-recent__list">{actividadReciente.map((actividad, index) => <div className="dashboard-recent__item" key={`${actividad.fecha}-${index}`}><div><strong>{actividad.cultivo}</strong><time>{new Date(actividad.fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</time></div><StatusTag>{actividad.tipo}</StatusTag></div>)}</div> : <p className="muted dashboard-empty">Aún no hay avances registrados.</p>}
+      </BaseCard>
     </>}
-    <BaseCard className="stack"><h2>¿Qué deseas hacer?</h2><p className="muted">La gestión de cultivos, avances y sincronización aún se encuentra en demostración.</p><div className="dashboard-actions"><Link to="/app/cultivos/nuevo">Registrar cultivo</Link><Link to="/app/cultivos">Ver mis cultivos o registrar avance</Link><Link to="/app/sincronizacion">Sincronización</Link><Link to="/app/perfil">Mis parcelas</Link></div></BaseCard>
+    <nav className="dashboard-shortcuts" aria-label="Accesos rápidos">
+      <Link to="/app/cultivos"><span aria-hidden="true">▦</span>Mis cultivos</Link>
+      <Link to="/app/perfil"><span aria-hidden="true">⌖</span>Mis parcelas</Link>
+    </nav>
   </div>
 }

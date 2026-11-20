@@ -2,7 +2,16 @@ import AlertMessage from '../components/ui/AlertMessage'
 import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
 import StatusTag from '../components/ui/StatusTag'
+import { Link } from 'react-router-dom'
 
 export default function SyncPage() {
-  return <div className="page-shell stack"><div className="page-heading"><span className="eyebrow">P10 · Sincronización</span><h1>Sincronización</h1><p>Control de datos guardados localmente.</p></div><AlertMessage title="Pantalla de demostración" tone="warning">Los elementos mostrados son ejemplos; la sincronización real aún no está disponible.</AlertMessage><AlertMessage title="Ejemplo: 3 elementos pendientes" tone="warning">Esta lista no refleja la cola real del dispositivo.</AlertMessage>{[['Actividad de riego','Maíz criollo · 17:32'],['2 fotografías','Actividad de riego · 1.8 MB'],['Nuevo cultivo','Chile serrano · Parcela Tres']].map(([title,detail]) => <BaseCard key={title}><div className="row row--between"><div><h3>{title}</h3><p className="muted">{detail}</p></div><StatusTag tone="warning">Pendiente</StatusTag></div></BaseCard>)}<BaseButton disabled>Sincronización no disponible</BaseButton></div>
+  return <div className="page-shell stack">
+    <div className="page-heading"><span className="eyebrow">ESTADO DE TUS DATOS</span><h1>Sincronización</h1><p>Consulta qué funciones están disponibles actualmente.</p></div>
+    <BaseCard className="sync-status-card">
+      <div className="row row--between"><div><h2>Trabajo sin conexión</h2><p className="muted">La captura local y el envío automático todavía no están habilitados.</p></div><StatusTag tone="warning">En desarrollo</StatusTag></div>
+      <p>Los cambios que realices requieren conexión y se envían directamente al servicio. Esta pantalla no muestra una cola real de elementos.</p>
+    </BaseCard>
+    <AlertMessage title="Antes de habilitar esta función" tone="info">Se debe definir cómo proteger la información local en dispositivos compartidos y cómo se procesarán los cambios al recuperar la conexión.</AlertMessage>
+    <div><Link to="/app/cultivos"><BaseButton variant="secondary">Volver a mis cultivos</BaseButton></Link></div>
+  </div>
 }
