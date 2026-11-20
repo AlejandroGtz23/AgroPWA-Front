@@ -1,7 +1,7 @@
 # Spec · Paginación del selector de cultivos
 
-**Estado:** implementado en frontend; pendiente de validar contra la API de producción.  
-**Flujo:** P09 · Registrar avance (`/app/cultivos/:cropId/actividad`)  
+**Estado:** implementado en frontend; pendiente de validar contra la API de producción.
+**Flujo:** P09 · Registrar avance (`/app/cultivos/:cropId/actividad`)
 **Motivo:** la API limita `tamano` a 50; solicitar 100 produce `400 Bad Request`.
 
 ## Objetivo

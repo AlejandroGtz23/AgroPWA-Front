@@ -1,6 +1,6 @@
 # Spec · Pulido UX/UI para cierre de AgroPWA
 
-**Estado:** primera iteración frontend aplicada; requiere revisión visual y pruebas en navegador.  
+**Estado:** primera iteración frontend aplicada; requiere revisión visual y pruebas en navegador.
 **Objetivo:** acercar las pantallas existentes a una experiencia consistente, profesional y lista para demostración, sin alterar rutas, contratos de API ni reglas de negocio.
 
 ## Principios
