@@ -1,79 +1,91 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import BaseButton from '../components/ui/BaseButton'
-import BaseCard from '../components/ui/BaseCard'
 import AlertMessage from '../components/ui/AlertMessage'
 import FormularioContacto from '../components/contacto/FormularioContacto'
 
+const imagenesLanding = [
+  { src: '/agro-campo-valle.jpeg', alt: 'Vista amplia de parcelas de cultivo entre montañas al atardecer.', etiqueta: 'Cada parcela, una historia' },
+  { src: '/agro-campo-hongos.jpeg', alt: 'Hongos recién cosechados mientras una persona consulta Agro en su teléfono.', etiqueta: 'Observa cada detalle' },
+  { src: '/agro-campo-flor.jpeg', alt: 'Flores creciendo en un campo preparado para el cultivo.', etiqueta: 'Cultiva con paciencia' },
+  { src: '/agro-campo-cempasuchil.jpeg', alt: 'Campo de flores de cempasúchil en temporada de cosecha.', etiqueta: 'El esfuerzo florece' },
+  { src: '/agro-campo-labranza.jpeg', alt: 'Productor guiando caballos durante la preparación de la tierra.', etiqueta: 'Tradición que avanza' },
+  { src: '/agro-campo-maiz.jpeg', alt: 'Productor revisando su parcela de maíz desde el teléfono.', etiqueta: 'Acompaña cada etapa' },
+  { src: '/agro-campo.jpeg', alt: 'Productor revisando sus cultivos con una tableta en la parcela.', etiqueta: 'Decisiones desde el campo' },
+]
+
 export default function LandingPage() {
   const { state } = useLocation()
+  const [imagenActiva, setImagenActiva] = useState(0)
+  const [reproduciendo, setReproduciendo] = useState(() => (
+    typeof window !== 'undefined'
+    && typeof window.matchMedia === 'function'
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ))
+
+  useEffect(() => {
+    if (!reproduciendo) return undefined
+    const intervalo = window.setInterval(() => {
+      setImagenActiva((actual) => (actual + 1) % imagenesLanding.length)
+    }, 6500)
+    return () => window.clearInterval(intervalo)
+  }, [reproduciendo])
+
+  function seleccionarImagen(indice) {
+    setImagenActiva((indice + imagenesLanding.length) % imagenesLanding.length)
+    setReproduciendo(false)
+  }
+
   return (
     <>
       <header className="public-nav">
         <Link className="brand" to="/"><span className="brand__mark" />AGRO</Link>
-        <nav className="public-nav__links">
-          <a href="#funciona">Cómo funciona</a><a href="#nosotros">Quiénes somos</a><a href="#acerca">Acerca de</a><a href="#contacto">Contáctanos</a>
-          <Link to="/login"><BaseButton>Iniciar sesión</BaseButton></Link>
+        <nav className="public-nav__links" aria-label="Acceso">
+          <Link to="/login">Iniciar sesión</Link>
+          <Link to="/registro"><BaseButton>Crear cuenta</BaseButton></Link>
         </nav>
       </header>
       <main>
         {state?.avisoSesion && <div className="page-shell"><AlertMessage title="Cierre de sesión" tone="warning">{state.avisoSesion}</AlertMessage></div>}
-        <section className="hero">
+        <section className="hero hero--immersive">
+          <div className="hero__visual">
+            <img key={imagenesLanding[imagenActiva].src} src={imagenesLanding[imagenActiva].src} alt={imagenesLanding[imagenActiva].alt} fetchPriority={imagenActiva === 0 ? 'high' : 'auto'} />
+          </div>
           <div className="hero__content">
-            <div>
-              <span className="eyebrow">P01 · Inicio público para la gestión de cultivos</span>
-              <h1>Tus cultivos en un solo lugar, solo aqui</h1>
-              <p>Registra, consulta y da seguimiento a tus cultivos incluso cuando estás en el campo y no tienes conexión a Internet.</p>
-              <div className="row"><Link to="/registro"><BaseButton>Regístrate</BaseButton></Link><Link to="/login"><BaseButton variant="secondary">Inicia sesión</BaseButton></Link></div>
+            <div className="hero__copy">
+              <span className="eyebrow">GESTIÓN AGRÍCOLA, A TU RITMO</span>
+              <h1>Tu campo,<br /><em>en orden.</em></h1>
+              <p>Cuida cada etapa de tus cultivos desde un solo lugar.</p>
+              <div className="hero__actions">
+                <Link to="/registro"><BaseButton>Comenzar ahora <span aria-hidden="true">→</span></BaseButton></Link>
+                <Link className="hero__login" to="/login">Ya tengo una cuenta</Link>
+              </div>
+              <div className="hero__features" aria-label="Herramientas de Agro"><span>Cultivos</span><span>Actividades</span><span>Fotografías</span></div>
             </div>
-            <div className="hero__art" aria-hidden="true" />
           </div>
-        </section>
-        <section id="funciona" className="page-shell">
-          <div className="page-heading"><span className="eyebrow">Una herramienta que te acompaña</span><h2>¿Cómo funciona?</h2><p>Un flujo sencillo pensado para registrar lo importante directamente desde el campo.</p></div>
-          <div className="grid grid--cards">
-            {[
-              ['Registra tu cultivo y parcela', 'Crea un registro con el nombre del cultivo, la ubicación y la fecha de siembra para tener una base clara desde el primer día.'],
-              ['Da seguimiento en cada visita', 'Anota riegos, fertilizaciones, avances y observaciones. También puedes agregar fotografías como evidencia del trabajo realizado.'],
-              ['Trabaja sin conexión', 'Si no tienes Internet, tus registros se guardan de forma segura en el dispositivo para que sigas trabajando sin interrupciones.'],
-              ['Sincroniza cuando regreses a línea', 'Al recuperar la conexión, revisa los elementos pendientes y sincronízalos para mantener tu información actualizada.'],
-              ['Consulta el historial de tu parcela', 'Visualiza las actividades de cada cultivo y toma decisiones con el contexto de lo que ya hiciste durante la temporada.'],
-              ['Mantén todo en un solo lugar', 'Evita notas dispersas y conserva la información de tus cultivos disponible cuando la necesites.'],
-            ].map(([title, description], index) => <BaseCard key={title} className="feature-card"><span className="feature-card__number">0{index + 1}</span><h3>{title}</h3><p>{description}</p></BaseCard>)}
-          </div>
-        </section>
-        <section id="nosotros" className="landing-section landing-section--tint">
-          <div className="landing-section__content landing-story">
-            <div className="page-heading">
-              <span className="eyebrow">Quiénes somos</span>
-              <h2>Construimos tecnología útil para el trabajo agrícola.</h2>
-              <p>Agro nace para acercar el registro y seguimiento de cultivos a productores que necesitan herramientas prácticas, claras y disponibles aun fuera de cobertura.</p>
+          <div className="hero__carousel" role="group" aria-label="Carrusel de imágenes del campo" onMouseEnter={() => setReproduciendo(false)} onFocusCapture={() => setReproduciendo(false)}>
+            <span className="hero__carousel-caption">{imagenesLanding[imagenActiva].etiqueta}</span>
+            <div className="hero__carousel-controls">
+              <button type="button" className="hero__carousel-arrow" aria-label="Imagen anterior" onClick={() => seleccionarImagen(imagenActiva - 1)}>‹</button>
+              <span className="hero__carousel-count" aria-hidden="true">{String(imagenActiva + 1).padStart(2, '0')} <span>/</span> {String(imagenesLanding.length).padStart(2, '0')}</span>
+              <button type="button" className="hero__carousel-arrow" aria-label="Imagen siguiente" onClick={() => seleccionarImagen(imagenActiva + 1)}>›</button>
+              <button type="button" className="hero__carousel-toggle" aria-label={reproduciendo ? 'Pausar carrusel' : 'Reproducir carrusel'} aria-pressed={!reproduciendo} onClick={() => setReproduciendo((actual) => !actual)}>{reproduciendo ? 'Ⅱ' : '▶'}</button>
             </div>
-            <div className="landing-story__body">
-              <p>Entendemos que la jornada no ocurre frente a un escritorio: sucede entre parcelas, recorridos y decisiones que no pueden esperar. Por eso diseñamos una experiencia sencilla, pensada para capturar información en el momento en que sucede.</p>
-              <p>Buscamos que cada productor tenga mayor control sobre su operación, conserve la historia de sus cultivos y pueda convertir los registros cotidianos en mejores decisiones para la siguiente etapa.</p>
+            <div className="hero__carousel-dots" aria-label="Elegir imagen">
+              {imagenesLanding.map((imagen, indice) => <button type="button" key={imagen.src} aria-label={`Mostrar imagen ${indice + 1}: ${imagen.etiqueta}`} aria-current={imagenActiva === indice ? 'true' : undefined} onClick={() => seleccionarImagen(indice)} />)}
             </div>
           </div>
         </section>
-        <section id="acerca" className="page-shell landing-section__content">
-          <div className="page-heading landing-section__intro">
-            <span className="eyebrow">Acerca de Agro</span>
-            <h2>Información de campo, siempre a la mano.</h2>
-            <p>Una aplicación web progresiva para organizar el seguimiento de cultivos de forma simple, incluso cuando la conectividad es limitada.</p>
-          </div>
-          <div className="about-grid">
-            <BaseCard className="about-card"><h3>Hecha para el campo</h3><p>Flujos directos y formularios fáciles de usar desde el teléfono, para registrar datos sin complicaciones durante la jornada.</p></BaseCard>
-            <BaseCard className="about-card"><h3>Disponible sin Internet</h3><p>La información puede guardarse localmente mientras no hay señal y sincronizarse después, para que una mala conexión no detenga tu trabajo.</p></BaseCard>
-            <BaseCard className="about-card"><h3>Seguimiento con contexto</h3><p>Reúne cultivos, actividades y evidencias en un mismo historial para consultar qué pasó en cada parcela cuando lo necesites.</p></BaseCard>
-          </div>
-          <div className="landing-cta">
-            <div><h2>Empieza a llevar el control de tus cultivos.</h2><p>Crea tu cuenta y registra tu primer cultivo en pocos pasos.</p></div>
-            <Link to="/registro"><BaseButton>Crear una cuenta</BaseButton></Link>
-          </div>
-        </section>
-        <section id="contacto" className="contact-section">
-          <div className="contact-section__content"><FormularioContacto /></div>
-        </section>
+        <details className="public-contact" id="contacto">
+          <summary>¿Necesitas ayuda? <strong>Contáctanos</strong></summary>
+          <div className="public-contact__form"><FormularioContacto /></div>
+        </details>
       </main>
+      <footer className="public-footer">
+        <Link className="brand" to="/"><span className="brand__mark" />AGRO</Link>
+        <span>El seguimiento de tus cultivos, en un solo lugar.</span>
+        <a href="#contacto">Ayuda</a>
+      </footer>
     </>
   )
 }
