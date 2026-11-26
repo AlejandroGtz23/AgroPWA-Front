@@ -10,6 +10,11 @@ import './styles/tokens.css'
 import './styles/global.css'
 import { registerPwa } from './pwa/registerPwa'
 import { openAgroDatabase } from './storage/agroDb'
+import { comprobarSalud } from './api/cliente'
+
+if (typeof navigator === 'undefined' || navigator.onLine !== false) {
+  comprobarSalud().catch(() => {})
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

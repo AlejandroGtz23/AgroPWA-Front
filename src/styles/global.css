@@ -105,8 +105,10 @@ button.crop-filter { cursor: pointer; }
 .crop-card { height: 100%; padding: 0; overflow: hidden; }
 .crop-link { min-width: 0; }
 .crop-link:focus-visible { outline: 3px solid rgb(31 122 77 / 30%); outline-offset: 3px; border-radius: var(--radius-md); }
-.crop-cover { position: relative; display: block; width: 100%; height: 10.625rem; overflow: hidden; object-fit: cover; border-radius: var(--radius-md); background: linear-gradient(#cfe8f2 0 48%, #e7e9c1 49% 63%, #6c9d50 64% 75%, #346f39 76%); }
+.crop-cover { position: relative; display: block; width: 100%; height: 10.625rem; overflow: hidden; object-fit: contain; border-radius: var(--radius-md); background: var(--color-primary-100); }
+.crop-cover--placeholder { background: linear-gradient(#cfe8f2 0 48%, #e7e9c1 49% 63%, #6c9d50 64% 75%, #346f39 76%); }
 .crop-cover--compact { height: 6.75rem; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.crop-cover--detail { height: clamp(14rem, 38vw, 28rem); }
 .crop-cover__sun { position: absolute; top: 14%; right: 17%; width: 1.1rem; aspect-ratio: 1; border-radius: 50%; background: var(--color-accent-500); }
 .crop-cover__field { position: absolute; left: -5%; width: 110%; height: 55%; border-radius: 50% 50% 0 0; }
 .crop-cover__field--back { bottom: 18%; background: #75a858; transform: rotate(-3deg); }
@@ -143,7 +145,7 @@ button.crop-filter { cursor: pointer; }
 .crop-summary dt, .crop-detail__facts dt { color: var(--color-text-muted); font-size: var(--font-size-xs); }
 .crop-summary dd, .crop-detail__facts dd { margin: var(--space-1) 0 0; font-weight: 700; }
 .crop-detail__main { display: grid; gap: var(--space-4); }
-.crop-detail__main > .crop-cover { height: 10.625rem; }
+.crop-detail__main > .crop-cover--detail { height: clamp(14rem, 38vw, 28rem); }
 .crop-detail__main h2 { margin: 0; }
 .crop-sync-label { margin: -0.75rem 0 0; color: var(--color-primary-600); font-size: var(--font-size-xs); }
 .crop-detail__facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: 0; }
@@ -167,6 +169,13 @@ button.crop-filter { cursor: pointer; }
 .login-spinner { display: inline-block; width: 1rem; height: 1rem; margin-right: var(--space-2); border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: -0.15em; animation: login-spin 700ms linear infinite; }
 @keyframes login-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .login-spinner { animation-duration: 1.8s; } }
+.install-app { position: relative; display: inline-grid; gap: var(--space-2); }
+.install-app__instructions { position: absolute; z-index: 5; top: calc(100% + var(--space-2)); right: 0; width: min(19rem, calc(100vw - 2rem)); display: grid; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); color: var(--color-text); background: var(--color-surface); box-shadow: var(--shadow-card); font-size: var(--font-size-sm); }
+.install-app__feedback { max-width: 24rem; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.profile-card__fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.profile-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.profile-links h2 { width: 100%; margin: 0; font-size: var(--font-size-md); }
+.profile-links > a { color: var(--color-primary-700); font-weight: 700; }
 .crop-unsaved { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-sm); }
 .crop-unsaved__dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--color-primary-600); }
 .crop-unsaved__dot.is-dirty { background: var(--color-accent-500); }
@@ -203,6 +212,9 @@ button.crop-filter { cursor: pointer; }
   .auth-page__aside { display: none; }
   .auth-page__form { padding: var(--space-4); }
   .auth-card { padding: var(--space-5); }
+  .profile-card__fields { grid-template-columns: 1fr; }
+  .profile-links { align-items: stretch; flex-direction: column; }
+  .profile-links h2 { width: auto; }
   .form-actions { flex-direction: column-reverse; }
   .form-actions > * { width: 100%; }
   .crop-toolbar { grid-template-columns: 1fr; }

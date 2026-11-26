@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import BaseButton from '../components/ui/BaseButton'
 import AlertMessage from '../components/ui/AlertMessage'
 import FormularioContacto from '../components/contacto/FormularioContacto'
+import InstallAppButton from '../components/pwa/InstallAppButton'
 
 const imagenesLanding = [
   { src: '/agro-campo-valle.jpeg', alt: 'Vista amplia de parcelas de cultivo entre montañas al atardecer.', etiqueta: 'Cada parcela, una historia' },
@@ -42,6 +43,7 @@ export default function LandingPage() {
         <Link className="brand" to="/"><span className="brand__mark" />AGRO</Link>
         <nav className="public-nav__links" aria-label="Acceso">
           <Link to="/login">Iniciar sesión</Link>
+          <InstallAppButton />
           <Link to="/registro"><BaseButton>Crear cuenta</BaseButton></Link>
         </nav>
       </header>

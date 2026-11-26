@@ -72,7 +72,7 @@ export default function CropDetailPage() {
     {location.state?.mensajeFotos && <AlertMessage title="Fotografías guardadas" tone="info">{location.state.mensajeFotos}</AlertMessage>}
     <div className="crop-form-heading"><Link to="/app/cultivos" aria-label="Volver a mis cultivos">←</Link><div><span className="eyebrow">P07 · Detalle del cultivo</span><h1>Detalle del cultivo</h1></div></div>
     <BaseCard className="crop-detail__main">
-      <CultivoPortada src={cultivo.portadaUrl} tipo={cultivo.tipo} />
+      <CultivoPortada src={cultivo.portadaUrl} tipo={cultivo.tipo} detail />
       <div className="row row--between"><h2>{cultivo.nombre}</h2><StatusTag tone={estadoVisual}>{cultivo.estado}</StatusTag></div>
       <p className="crop-sync-label">{cultivo.estadoSincronizacion || 'Sincronizado'}{cultivo.actualizadoUtc ? ` · ${fechaCorta(cultivo.actualizadoUtc)}` : ''}</p>
       <dl className="crop-detail__facts">
