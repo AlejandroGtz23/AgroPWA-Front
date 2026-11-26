@@ -3,6 +3,9 @@ const apiUrl = env.VITE_API_URL || (env.PROD
   ? 'https://agropwa-api-cfcfcdbhdddqh7a7.centralus-01.azurewebsites.net'
   : 'https://localhost:7095')
 
+let comprobacionSaludEnCurso = null
+let ultimaComprobacionSalud = null
+
 export class ApiError extends Error {
   constructor(message, status, errors = {}) {
     super(message)
@@ -40,8 +43,25 @@ export function registrarUsuario(datos) {
   return solicitarApi('/api/auth/registro', { method: 'POST', body: JSON.stringify(datos) })
 }
 
-export function comprobarSalud() {
-  return solicitarApi('/api/salud', { cache: 'no-store' })
+export function comprobarSalud({ renovar = false } = {}) {
+  if (!renovar && ultimaComprobacionSalud) {
+    return Promise.resolve(ultimaComprobacionSalud)
+  }
+  if (comprobacionSaludEnCurso) return comprobacionSaludEnCurso
+
+  comprobacionSaludEnCurso = solicitarApi('/api/salud', { cache: 'no-store' })
+    .then((data) => {
+      ultimaComprobacionSalud = data?.estado === 'OK' ? data : null
+      return data
+    })
+    .catch((error) => {
+      ultimaComprobacionSalud = null
+      throw error
+    })
+    .finally(() => {
+      comprobacionSaludEnCurso = null
+    })
+  return comprobacionSaludEnCurso
 }
 
 export function iniciarSesion(datos) {
