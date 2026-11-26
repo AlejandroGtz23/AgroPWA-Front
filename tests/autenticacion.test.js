@@ -26,6 +26,8 @@ const { enviarContacto } = await import('../src/api/contacto.js')
 const { validarCultivo, diasDesdeSiembra } = await import('../src/components/cultivos/reglasCultivo.js')
 const { validarEdicionCultivo } = await import('../src/components/cultivos/reglasEdicionCultivo.js')
 const { obtenerEstadoEsperaLogin } = await import('../src/auth/estadoEsperaLogin.js')
+const { comprobarSalud, solicitarApi, solicitarRecuperacionContrasena, restablecerContrasena } = await import('../src/api/cliente.js')
+const { obtenerPerfil, actualizarPerfil, actualizarContrasena } = await import('../src/api/perfil.js')
 const sesion = (suffix, expired = false) => ({ accessToken: `access-${suffix}`, refreshToken: `refresh-${suffix}`, expiraUtc: new Date(Date.now() + (expired ? -60000 : 600000)).toISOString(), usuario: { id: 1 } })
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -279,4 +281,91 @@ test('el login explica la espera inicial y ofrece orientación cuando tarda más
   assert.match(obtenerEstadoEsperaLogin(0).descripcion, /espera una respuesta segura/i)
   assert.match(obtenerEstadoEsperaLogin(5000).descripcion, /conexión o el tiempo de respuesta del servidor/i)
   assert.match(obtenerEstadoEsperaLogin(5000).descripcion, /no vuelvas a enviar/i)
+})
+
+test('la comprobación de salud comparte llamadas iniciales y permite refrescar al reconectar', async () => {
+  let llamadas = 0
+  globalThis.fetch = async (url, options) => {
+    llamadas++
+    assert.ok(url.endsWith('/api/salud'))
+    assert.equal(options.cache, 'no-store')
+    return json({ estado: 'OK' })
+  }
+
+  const primera = comprobarSalud()
+  const concurrente = comprobarSalud()
+  assert.equal(primera, concurrente)
+  assert.deepEqual(await Promise.all([primera, concurrente]), [{ estado: 'OK' }, { estado: 'OK' }])
+  assert.equal(llamadas, 1)
+
+  assert.deepEqual(await comprobarSalud(), { estado: 'OK' })
+  assert.equal(llamadas, 1)
+
+  await comprobarSalud({ renovar: true })
+  assert.equal(llamadas, 2)
+})
+
+test('una comprobación fallida no bloquea y una llamada posterior puede recuperarse', async () => {
+  let llamadas = 0
+  globalThis.fetch = async () => {
+    llamadas++
+    if (llamadas === 1) throw new Error('sin conexión')
+    return json({ estado: 'OK' })
+  }
+
+  await assert.rejects(comprobarSalud({ renovar: true }), (error) => error.status === 0)
+  assert.deepEqual(await comprobarSalud(), { estado: 'OK' })
+  assert.equal(llamadas, 2)
+})
+
+test('perfil y cambio de contraseña usan rutas autenticadas y payloads acordados', async () => {
+  guardarSesion(sesion('perfil'))
+  const llamadas = []
+  globalThis.fetch = async (url, options) => {
+    llamadas.push({ url: new URL(url), options })
+    if (options.method === 'PUT' && url.endsWith('/api/perfil/contrasena')) return new Response(null, { status: 204 })
+    return json({ nombre: 'Ana', correo: 'ana@example.com' })
+  }
+  const datosPerfil = {
+    nombre: 'Ana',
+    apellidoPaterno: 'López',
+    apellidoMaterno: '',
+    telefono: '1234567890',
+    comunidadMunicipio: 'San Miguel',
+  }
+  await obtenerPerfil()
+  await actualizarPerfil(datosPerfil)
+  await actualizarContrasena({ contrasenaActual: 'anterior', contrasenaNueva: 'nueva123' })
+
+  assert.equal(llamadas.length, 3)
+  assert.equal(llamadas[0].url.pathname, '/api/perfil')
+  assert.equal(llamadas[0].options.headers.Authorization, 'Bearer access-perfil')
+  assert.equal(llamadas[1].options.method, 'PUT')
+  assert.deepEqual(JSON.parse(llamadas[1].options.body), datosPerfil)
+  assert.equal(llamadas[2].url.pathname, '/api/perfil/contrasena')
+  assert.equal(llamadas[2].options.method, 'PUT')
+  assert.deepEqual(JSON.parse(llamadas[2].options.body), { contrasenaActual: 'anterior', contrasenaNueva: 'nueva123' })
+})
+
+test('recuperación de contraseña envía solo los datos de los contratos públicos', async () => {
+  const llamadas = []
+  globalThis.fetch = async (url, options) => {
+    llamadas.push({ url, options })
+    return url.endsWith('/api/auth/restablecer') ? new Response(null, { status: 204 }) : json({ mensaje: 'ok' })
+  }
+  await solicitarRecuperacionContrasena('ana@example.com')
+  await restablecerContrasena('token-de-prueba', 'nueva1234')
+
+  assert.equal(llamadas[0].url.endsWith('/api/auth/recuperar'), true)
+  assert.deepEqual(JSON.parse(llamadas[0].options.body), { correo: 'ana@example.com' })
+  assert.equal(llamadas[1].url.endsWith('/api/auth/restablecer'), true)
+  assert.deepEqual(JSON.parse(llamadas[1].options.body), { token: 'token-de-prueba', contrasenaNueva: 'nueva1234' })
+})
+
+test('los errores HTTP sin detalle del servidor ofrecen instrucciones según el estado', async () => {
+  globalThis.fetch = async () => json({}, 413)
+  await assert.rejects(solicitarApi('/api/prueba'), (error) => error.message.includes('archivo supera el tamaño permitido'))
+
+  globalThis.fetch = async () => json({}, 500)
+  await assert.rejects(solicitarApi('/api/prueba'), (error) => error.message.includes('revisa el resultado antes de volver a enviarla'))
 })

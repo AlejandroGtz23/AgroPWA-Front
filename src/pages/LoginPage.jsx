@@ -8,6 +8,7 @@ import BaseButton from '../components/ui/BaseButton'
 import BaseCard from '../components/ui/BaseCard'
 import BaseField from '../components/ui/BaseField'
 import useOnlineStatus from '../hooks/useOnlineStatus'
+import InstallAppButton from '../components/pwa/InstallAppButton'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -69,8 +70,9 @@ export default function LoginPage() {
           <span>{estadoEspera.descripcion}</span>
         </div>}
       </form>
-      <p className="muted">¿Olvidaste tu contraseña? <small>Recuperación próximamente.</small></p>
+      <p className="muted">¿Olvidaste tu contraseña? <Link to="/recuperar">Recupérala con tu correo</Link></p>
       <p className="muted">¿Aún no tienes cuenta? <Link to="/registro"><strong>Regístrate</strong></Link></p>
+      <InstallAppButton />
     </BaseCard>
   </AuthShell>
 }

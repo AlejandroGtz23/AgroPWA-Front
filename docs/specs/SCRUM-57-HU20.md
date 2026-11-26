@@ -21,6 +21,8 @@ Permitir adjuntar fotografías JPG/PNG a un avance desde cámara o galería, pre
 - Comprimir cada foto a un tamaño objetivo de aproximadamente 1 MB, sin agregar dependencias sin aprobación.
 - Subir al servidor y mostrar las fotos en la pestaña «Fotografías» del detalle del cultivo.
 - La subtarea SCRUM-57 también menciona foto de portada en «Nuevo cultivo» y «Editar cultivo». La API SCRUM-56 incluye `esPortada`; coordinar este alcance con HU-14/HU-17 sin alterar sus pantallas o flujos aprobados fuera de lo necesario.
+- La visualización de la foto de portada en las tarjetas de «Cultivos» y en el «Detalle de cultivo» se rige por [Renderizado de portadas de cultivos](VISUAL-PORTADAS-CULTIVOS.md): preservar la imagen completa, sin estiramiento ni recorte accidental.
+- Los mensajes de selección, carga, límite, error y reintento deben seguir [UX de mensajes](UX-MENSAJES-TRANSVERSALES.md): específicos, accesibles y con una acción útil.
 - Fuera de alcance: edición de imagen y carga de video.
 
 ## Integración con API
@@ -66,6 +68,7 @@ La captura puede crear una previsualización local temporal durante el formulari
 4. **Galería:** tras guardar el avance con fotos, la pestaña «Fotografías» del cultivo muestra las fotos persistidas.
 5. **Compresión:** cada imagen enviada se comprime al objetivo aproximado de 1 MB, salvo limitación técnica comunicada y error recuperable.
 6. **Fallo de subida:** no se presenta una foto como persistida si la API falla; se conserva la selección temporal y se permite reintentar.
+7. **Foto de portada:** en tarjetas y detalle, una portada panorámica, vertical o de alta resolución se ajusta proporcionalmente al marco y permanece reconocible, conforme a `VISUAL-PORTADAS-CULTIVOS.md`.
 
 ## Pruebas propuestas
 
