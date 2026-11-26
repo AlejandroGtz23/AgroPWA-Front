@@ -15,6 +15,8 @@ import PhotosPage from './pages/PhotosPage'
 import SyncPage from './pages/SyncPage'
 import ProfilePage from './pages/ProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
+import RecoveryRequestPage from './pages/RecoveryRequestPage'
+import PasswordResetPage from './pages/PasswordResetPage'
 
 export default function App() {
   return (
@@ -24,6 +26,8 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
       </Route>
       <Route path="/registro" element={<RegisterPage />} />
+      <Route path="/recuperar" element={<RecoveryRequestPage />} />
+      <Route path="/restablecer" element={<PasswordResetPage />} />
 
       <Route element={<RutaProtegida />}>
         <Route path="/app" element={<AppLayout />}>

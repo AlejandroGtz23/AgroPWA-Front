@@ -26,7 +26,9 @@ export default function ConnectionStatus() {
   return (
     <div className="connection-status">
       <AlertMessage title={isOnline ? 'Servidor no disponible' : 'Sin conexión'} tone="warning">
-        {isOnline ? 'No fue posible comprobar la conexión con el servidor.' : 'Algunas funciones requieren conexión a Internet.'}
+        {isOnline
+          ? 'Agro todavía está iniciando o no respondió. Mantén la app abierta y vuelve a intentar la acción en unos segundos.'
+          : 'Perdiste la conexión a Internet. Puedes seguir consultando la app, pero guardar o actualizar información requiere volver a conectarte.'}
       </AlertMessage>
     </div>
   )
