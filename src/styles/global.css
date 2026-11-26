@@ -418,7 +418,7 @@ body { line-height: 1.5; }
 .public-contact summary::-webkit-details-marker { display: none; }
 .public-contact summary strong { color: var(--color-primary-600); }
 .public-contact summary::after { content: '+'; color: var(--color-primary-600); font-size: 1.2rem; font-weight: 700; }
-.public-contact[open] summary::after { content: '├ö├¬├å'; }
+.public-contact[open] summary::after { content: '−'; }
 .public-contact__form { width: min(100%, var(--content-max)); margin-inline: auto; padding: var(--space-4) var(--space-6) var(--space-10); }
 .public-footer { min-height: 4rem; padding-block: var(--space-3); }
 
