@@ -26,6 +26,7 @@ const { enviarContacto } = await import('../src/api/contacto.js')
 const { validarCultivo, diasDesdeSiembra } = await import('../src/components/cultivos/reglasCultivo.js')
 const { validarEdicionCultivo } = await import('../src/components/cultivos/reglasEdicionCultivo.js')
 const { obtenerEstadoEsperaLogin } = await import('../src/auth/estadoEsperaLogin.js')
+const { comprobarSalud } = await import('../src/api/cliente.js')
 const sesion = (suffix, expired = false) => ({ accessToken: `access-${suffix}`, refreshToken: `refresh-${suffix}`, expiraUtc: new Date(Date.now() + (expired ? -60000 : 600000)).toISOString(), usuario: { id: 1 } })
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -279,4 +280,39 @@ test('el login explica la espera inicial y ofrece orientación cuando tarda más
   assert.match(obtenerEstadoEsperaLogin(0).descripcion, /espera una respuesta segura/i)
   assert.match(obtenerEstadoEsperaLogin(5000).descripcion, /conexión o el tiempo de respuesta del servidor/i)
   assert.match(obtenerEstadoEsperaLogin(5000).descripcion, /no vuelvas a enviar/i)
+})
+
+test('la comprobación de salud comparte llamadas iniciales y permite refrescar al reconectar', async () => {
+  let llamadas = 0
+  globalThis.fetch = async (url, options) => {
+    llamadas++
+    assert.ok(url.endsWith('/api/salud'))
+    assert.equal(options.cache, 'no-store')
+    return json({ estado: 'OK' })
+  }
+
+  const primera = comprobarSalud()
+  const concurrente = comprobarSalud()
+  assert.equal(primera, concurrente)
+  assert.deepEqual(await Promise.all([primera, concurrente]), [{ estado: 'OK' }, { estado: 'OK' }])
+  assert.equal(llamadas, 1)
+
+  assert.deepEqual(await comprobarSalud(), { estado: 'OK' })
+  assert.equal(llamadas, 1)
+
+  await comprobarSalud({ renovar: true })
+  assert.equal(llamadas, 2)
+})
+
+test('una comprobación fallida no bloquea y una llamada posterior puede recuperarse', async () => {
+  let llamadas = 0
+  globalThis.fetch = async () => {
+    llamadas++
+    if (llamadas === 1) throw new Error('sin conexión')
+    return json({ estado: 'OK' })
+  }
+
+  await assert.rejects(comprobarSalud({ renovar: true }), (error) => error.status === 0)
+  assert.deepEqual(await comprobarSalud(), { estado: 'OK' })
+  assert.equal(llamadas, 2)
 })

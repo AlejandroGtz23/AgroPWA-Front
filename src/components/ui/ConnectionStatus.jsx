@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { comprobarSalud } from '../../api/cliente'
 import AlertMessage from './AlertMessage'
 import useOnlineStatus from '../../hooks/useOnlineStatus'
@@ -6,11 +6,14 @@ import useOnlineStatus from '../../hooks/useOnlineStatus'
 export default function ConnectionStatus() {
   const isOnline = useOnlineStatus()
   const [apiUnavailable, setApiUnavailable] = useState(false)
+  const alreadyChecked = useRef(false)
 
   useEffect(() => {
     if (!isOnline) return undefined
     let active = true
-    comprobarSalud().then((result) => {
+    const renovar = alreadyChecked.current
+    alreadyChecked.current = true
+    comprobarSalud({ renovar }).then((result) => {
       if (active) setApiUnavailable(result?.estado !== 'OK')
     }).catch(() => {
       if (active) setApiUnavailable(true)
